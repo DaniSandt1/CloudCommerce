@@ -9,8 +9,8 @@ import os
 from datetime import datetime, timezone
 
 import boto3
-import psycopg2
-import psycopg2.extras
+import psycopg
+from psycopg.rows import dict_row
 
 DB_HOST = os.getenv("DB_HOST", "localhost")
 DB_PORT = int(os.getenv("DB_PORT", "5432"))
@@ -23,7 +23,7 @@ S3_PREFIX = os.getenv("S3_PREFIX", "usuarios")
 
 
 def extraer_usuarios():
-    conn = psycopg2.connect(
+    conn = psycopg.connect(
         host=DB_HOST,
         port=DB_PORT,
         user=DB_USER,
@@ -31,8 +31,8 @@ def extraer_usuarios():
         dbname=DB_NAME,
     )
     try:
-        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cursor:
-            cursor.execute(
+        with conn.cursor(row_factory=dict_row) as cursor:
+              cursor.execute(
                 """
                 SELECT u.id, u.nombre, u.email, u.fecha_registro,
                        d.calle, d.ciudad, d.pais
