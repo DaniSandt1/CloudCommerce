@@ -1,0 +1,66 @@
+version: "3.9"
+
+services:
+  mysql-productos:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root_pass
+      MYSQL_DATABASE: productos_db
+      MYSQL_USER: productos_user
+      MYSQL_PASSWORD: productos_pass
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_productos_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot_pass"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  postgres-usuarios:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: usuarios_db
+      POSTGRES_USER: usuarios_user
+      POSTGRES_PASSWORD: usuarios_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_usuarios_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U usuarios_user -d usuarios_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  ms-productos:
+    build: ../ms-productos
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: mysql+pymysql://productos_user:productos_pass@mysql-productos:3306/productos_db
+    ports:
+      - "8001:8000"
+    depends_on:
+      mysql-productos:
+        condition: service_healthy
+
+  ms-usuarios:
+    build: ../ms-usuarios
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: jdbc:postgresql://postgres-usuarios:5432/usuarios_db
+      DATABASE_USER: usuarios_user
+      DATABASE_PASSWORD: usuarios_pass
+      SEED_COUNT: "20000"
+    ports:
+      - "8002:8000"
+    depends_on:
+      postgres-usuarios:
+        condition: service_healthy
+
+volumes:
+  mysql_productos_data:
+  postgres_usuarios_data:
