@@ -31,6 +31,7 @@ Data Science: MV Ingesta (3 contenedores docker en Python, pull 100%) → Bucket
 - [frontend/](frontend/) — Aplicación web (React) que consume los 5 microservicios, desplegada en AWS Amplify.
 - [data-science/](data-science/) — MV de ingesta, contenedores de ingesta a S3, catálogo de datos Glue.
 - [docs/](docs/) — Diagrama de arquitectura (draw.io), informe y presentación.
+- [DEPLOYMENT.md](DEPLOYMENT.md) — cómo desplegar todo en AWS desde cero (EC2, Docker, S3), con troubleshooting.
 
 ## Mapeo a la rúbrica
 
@@ -55,26 +56,32 @@ Data Science: MV Ingesta (3 contenedores docker en Python, pull 100%) → Bucket
 
 ## Estado actual
 
-**Alcance de la primera entrega (indicación del asesor Santiago):** 2 microservicios funcionando (`ms-productos` y `ms-usuarios`) + frontend que los consuma + datos subidos a S3.
+**Alcance de la primera entrega (indicación del asesor Santiago): COMPLETO ✅** — 2 microservicios funcionando (`ms-productos` y `ms-usuarios`) + frontend que los consuma + datos subidos a S3.
 
-- ✅ `ms-productos` (Python/FastAPI + MySQL) — implementado
-- ✅ `ms-usuarios` (Java/Spring Boot + PostgreSQL) — implementado
-- ✅ `frontend` (React) consumiendo ambos — implementado
-- ✅ `ingesta-productos` e `ingesta-usuarios` (Python → S3) — implementado, falta bucket S3 real en AWS
+- ✅ `ms-productos` (Python/FastAPI + MySQL) — desplegado en EC2, 20,000 productos cargados
+- ✅ `ms-usuarios` (Java/Spring Boot + PostgreSQL) — desplegado en EC2, 20,000 usuarios cargados
+- ✅ `frontend` (React) consumiendo ambos — probado end-to-end contra la EC2
+- ✅ `ingesta-productos` e `ingesta-usuarios` (Python → S3) — bucket `cloudcommerce-datalake` creado, ambos CSV subidos correctamente
 - ⏳ `ms-pedidos`, `ms-checkout`, `ms-analitica` — pendientes para la entrega final (Hito 2)
+- ⏳ AWS Amplify, API Gateway, balanceador de carga, MV separadas para BD e ingesta — pendientes para la entrega final (Hito 2)
 
-### Cómo levantar todo localmente
+### Cómo correrlo (AWS + local)
 
+Guía paso a paso completa (lanzar la EC2, Docker, seed de datos, frontend, bucket S3, troubleshooting): **[DEPLOYMENT.md](DEPLOYMENT.md)**.
+
+Resumen rápido, ya con la EC2 lista y el repo clonado en ella:
 ```bash
 cd backend/docker-compose
 docker compose up -d --build
 docker compose exec ms-productos python -m app.seed   # carga 20,000 productos ficticios
-
-cd ../../frontend
+```
+```bash
+# en tu laptop, apuntando frontend/.env a la IP pública de la EC2
+cd frontend
 npm install && npm run dev
 ```
 
-Ver detalles en [backend/docker-compose/README.md](backend/docker-compose/README.md) y [frontend/README.md](frontend/README.md).
+Ver también [backend/docker-compose/README.md](backend/docker-compose/README.md) y [frontend/README.md](frontend/README.md).
 
 ## Plazos
 

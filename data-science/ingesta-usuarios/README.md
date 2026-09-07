@@ -17,7 +17,10 @@ docker build -t ingesta-usuarios .
 docker run --rm --network docker-compose_default --env-file .env ingesta-usuarios
 ```
 
+## Estado
+
+✅ Bucket `cloudcommerce-datalake` creado y probado — ejecutado desde la EC2, sube correctamente el CSV con los 20,000 usuarios (+ direcciones) a `s3://cloudcommerce-datalake/usuarios/`.
+
 ## Pendiente
 
-- [ ] Crear el bucket S3 real en AWS y configurar `S3_BUCKET_NAME`
-- [ ] Ejecutar desde la MV Ingesta
+- [ ] Mover la ejecución a una MV "ingesta" dedicada (por ahora corre en la misma EC2 del backend)
