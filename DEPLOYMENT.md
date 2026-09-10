@@ -96,7 +96,7 @@ docker compose version
 ## 4. Clonar el repositorio
 
 ```bash
-git clone https://github.com/<tu-usuario>/CloudCommerce.git
+git clone https://github.com/DaniSandt1/CloudCommerce.git
 cd CloudCommerce
 ```
 
@@ -168,7 +168,7 @@ Consola: **S3 → Create bucket** → nombre único globalmente (ej. `cloudcomme
 
 O por CLI desde la EC2 (ya tiene permisos por el `LabInstanceProfile`):
 ```bash
-aws s3 mb s3://cloudcommerce-datalake-tunombre123 --region us-east-1
+aws s3 mb s3://cloudcommerce-datalake --region us-east-1
 ```
 
 ### 7.2 Correr las ingestas
@@ -193,7 +193,7 @@ DB_USER=productos_user
 DB_PASSWORD=productos_pass
 DB_NAME=productos_db
 
-S3_BUCKET_NAME=cloudcommerce-datalake-tunombre123
+S3_BUCKET_NAME=cloudcommerce-datalake
 S3_PREFIX=productos
 
 AWS_DEFAULT_REGION=us-east-1
@@ -222,7 +222,7 @@ DB_USER=usuarios_user
 DB_PASSWORD=usuarios_pass
 DB_NAME=usuarios_db
 
-S3_BUCKET_NAME=cloudcommerce-datalake-tunombre123
+S3_BUCKET_NAME=cloudcommerce-datalake
 S3_PREFIX=usuarios
 
 AWS_DEFAULT_REGION=us-east-1
@@ -235,8 +235,8 @@ python ingesta.py
 ### 7.3 Verificar
 
 ```bash
-aws s3 ls s3://cloudcommerce-datalake-tunombre123/productos/
-aws s3 ls s3://cloudcommerce-datalake-tunombre123/usuarios/
+aws s3 ls s3://cloudcommerce-datalake/productos/
+aws s3 ls s3://cloudcommerce-datalake/usuarios/
 ```
 Deberías ver un `.csv` en cada carpeta (también visible desde la consola de S3 — sirve como captura para el informe).
 
