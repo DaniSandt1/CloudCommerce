@@ -48,6 +48,34 @@ ssh -i tu-key.pem ubuntu@<ip-publica-de-la-instancia>
 
 ---
 
+## Reinicio rápido (ya con todo instalado)
+
+Si ya hiciste los pasos 1-7 una vez (Docker, repo clonado, microservicios corriendo, ingesta a S3), retomar el trabajo en una sesión nueva es mucho más corto:
+
+1. **Prender la EC2** (si estaba detenida): AWS Console → EC2 → **Start instance**. Espera ~30-60 seg y copia la **Public IPv4** actual.
+2. **Conectarte** por SSH (paso 2) o EC2 Instance Connect.
+3. **Verificar que los contenedores ya están arriba** — como el `docker-compose.yml` tiene `restart: unless-stopped`, Docker los vuelve a levantar solos apenas arranca el daemon junto con la instancia:
+   ```bash
+   docker ps
+   ```
+   Si ya ves `ms-productos`, `ms-usuarios`, `mysql-productos` y `postgres-usuarios` corriendo, no hace falta nada más. Si no aparecen:
+   ```bash
+   cd ~/CloudCommerce/backend/docker-compose
+   docker compose up -d      # sin --build, las imágenes ya existen
+   ```
+   Confirma con `curl localhost:8001/health` y `curl localhost:8002/health`.
+4. **Frontend** (en tu laptop): si la IP pública cambió, actualiza `frontend/.env` con la IP nueva; si no cambió, solo corre `npm run dev`.
+
+### 💡 Sugerencia: asígnale una Elastic IP para no repetir el paso del `.env`
+
+Sin Elastic IP, la IP pública de la EC2 cambia cada vez que la detienes y la vuelves a prender, obligándote a editar `frontend/.env` (y, si ya montaste el API Gateway del paso 8, también sus integraciones) en cada sesión.
+
+**EC2 → Elastic IPs → Allocate Elastic IP address → Allocate** → luego **Actions → Associate Elastic IP address** → selecciona tu instancia.
+
+Con la Elastic IP asociada, la IP queda fija entre inicios/detenciones y configuras `frontend/.env` (y el API Gateway) una sola vez.
+
+---
+
 ## 3. Instalar Docker y Git
 
 ```bash
