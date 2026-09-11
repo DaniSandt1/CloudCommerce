@@ -68,11 +68,11 @@ Si ya hiciste los pasos 1-7 una vez (Docker, repo clonado, microservicios corrie
 
 ### 💡 Sugerencia: asígnale una Elastic IP para no repetir el paso del `.env`
 
-Sin Elastic IP, la IP pública de la EC2 cambia cada vez que la detienes y la vuelves a prender, obligándote a editar `frontend/.env` (y, si ya montaste el API Gateway del paso 8, también sus integraciones) en cada sesión.
+Sin Elastic IP, la IP pública de la EC2 cambia cada vez que la detienes y la vuelves a prender, obligándote a editar `frontend/.env` en cada sesión.
 
 **EC2 → Elastic IPs → Allocate Elastic IP address → Allocate** → luego **Actions → Associate Elastic IP address** → selecciona tu instancia.
 
-Con la Elastic IP asociada, la IP queda fija entre inicios/detenciones y configuras `frontend/.env` (y el API Gateway) una sola vez.
+Con la Elastic IP asociada, la IP queda fija entre inicios/detenciones y configuras `frontend/.env` una sola vez.
 
 ---
 

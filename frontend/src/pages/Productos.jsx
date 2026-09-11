@@ -1,10 +1,14 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { productosApi } from "../api/client";
+import CategoryChips from "../components/CategoryChips";
+import ProductGrid from "../components/ProductGrid";
+import ProductModal from "../components/ProductModal";
 
-export default function Productos() {
+export default function Productos({ searchQuery }) {
   const [productos, setProductos] = useState([]);
   const [categorias, setCategorias] = useState([]);
   const [categoriaId, setCategoriaId] = useState("");
+  const [selected, setSelected] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -24,48 +28,30 @@ export default function Productos() {
       .finally(() => setLoading(false));
   }, [categoriaId]);
 
+  const filtrados = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return productos;
+    return productos.filter((p) => p.nombre.toLowerCase().includes(q));
+  }, [productos, searchQuery]);
+
   return (
     <section>
-      <h2>Catálogo de productos</h2>
-      <p>Consume ms-productos (Python/FastAPI + MySQL)</p>
+      <CategoryChips categorias={categorias} selectedId={categoriaId} onSelect={setCategoriaId} />
 
-      {error && <p style={{ color: "crimson" }}>{error}</p>}
-
-      <label>
-        Filtrar por categoría:{" "}
-        <select value={categoriaId} onChange={(e) => setCategoriaId(e.target.value)}>
-          <option value="">Todas</option>
-          {categorias.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.nombre}
-            </option>
-          ))}
-        </select>
-      </label>
+      {error && <p className="px-4 text-sm text-red-600">{error}</p>}
 
       {loading ? (
-        <p>Cargando...</p>
+        <p className="px-4 py-16 text-center text-sm text-zinc-500">Cargando productos...</p>
       ) : (
-        <table>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Nombre</th>
-              <th>Precio</th>
-              <th>Stock</th>
-            </tr>
-          </thead>
-          <tbody>
-            {productos.map((p) => (
-              <tr key={p.id}>
-                <td>{p.id}</td>
-                <td>{p.nombre}</td>
-                <td>S/ {p.precio}</td>
-                <td>{p.stock}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <ProductGrid productos={filtrados} onSelect={setSelected} />
+      )}
+
+      {selected && (
+        <ProductModal
+          producto={selected}
+          categoriaNombre={categorias.find((c) => c.id === selected.categoria_id)?.nombre}
+          onClose={() => setSelected(null)}
+        />
       )}
     </section>
   );
