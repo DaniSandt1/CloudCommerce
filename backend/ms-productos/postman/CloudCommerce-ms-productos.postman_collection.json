@@ -1,0 +1,159 @@
+{
+  "info": {
+    "name": "CloudCommerce - ms-productos CRUD",
+    "description": "Demo CRUD (Create, Read, Update, Delete) sobre ms-productos (FastAPI + MySQL) corriendo en la MV Backend. Cambia la variable de colección `base_url` por la IP pública actual de tu MV Backend antes de correr.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://<ip-publica-mv-backend>:8001", "type": "string" },
+    { "key": "producto_id", "value": "", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "1. Crear producto",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 200 (creado)', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "const jsonData = pm.response.json();",
+              "pm.test('La respuesta trae un id numérico', function () {",
+              "    pm.expect(jsonData.id).to.be.a('number');",
+              "});",
+              "pm.collectionVariables.set('producto_id', jsonData.id);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nombre\": \"Producto de prueba CRUD\",\n  \"descripcion\": \"Creado desde Postman para la demo CRUD\",\n  \"precio\": 99.90,\n  \"stock\": 10,\n  \"categoria_id\": 1\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/productos",
+          "host": ["{{base_url}}"],
+          "path": ["productos"]
+        }
+      }
+    },
+    {
+      "name": "2. Consultar producto creado",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "const jsonData = pm.response.json();",
+              "pm.test('El nombre coincide con el creado', function () {",
+              "    pm.expect(jsonData.nombre).to.eql('Producto de prueba CRUD');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{base_url}}/productos/{{producto_id}}",
+          "host": ["{{base_url}}"],
+          "path": ["productos", "{{producto_id}}"]
+        }
+      }
+    },
+    {
+      "name": "3. Editar producto",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "const jsonData = pm.response.json();",
+              "pm.test('El precio quedó actualizado', function () {",
+              "    pm.expect(jsonData.precio).to.eql(149.9);",
+              "});",
+              "pm.test('El nombre quedó actualizado', function () {",
+              "    pm.expect(jsonData.nombre).to.eql('Producto de prueba CRUD (editado)');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nombre\": \"Producto de prueba CRUD (editado)\",\n  \"descripcion\": \"Editado desde Postman para la demo CRUD\",\n  \"precio\": 149.90,\n  \"stock\": 5,\n  \"categoria_id\": 1\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/productos/{{producto_id}}",
+          "host": ["{{base_url}}"],
+          "path": ["productos", "{{producto_id}}"]
+        }
+      }
+    },
+    {
+      "name": "4. Eliminar producto",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 204 (eliminado)', function () {",
+              "    pm.response.to.have.status(204);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "url": {
+          "raw": "{{base_url}}/productos/{{producto_id}}",
+          "host": ["{{base_url}}"],
+          "path": ["productos", "{{producto_id}}"]
+        }
+      }
+    },
+    {
+      "name": "5. Verificar que ya no existe",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 404 (ya no existe, la eliminación funcionó)', function () {",
+              "    pm.response.to.have.status(404);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{base_url}}/productos/{{producto_id}}",
+          "host": ["{{base_url}}"],
+          "path": ["productos", "{{producto_id}}"]
+        }
+      }
+    }
+  ]
+}

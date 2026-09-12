@@ -38,5 +38,25 @@ def create_producto(db: Session, producto: schemas.ProductoCreate):
     return db_producto
 
 
+def update_producto(db: Session, producto_id: int, producto: schemas.ProductoCreate):
+    db_producto = get_producto(db, producto_id)
+    if db_producto is None:
+        return None
+    for campo, valor in producto.model_dump().items():
+        setattr(db_producto, campo, valor)
+    db.commit()
+    db.refresh(db_producto)
+    return db_producto
+
+
+def delete_producto(db: Session, producto_id: int) -> bool:
+    db_producto = get_producto(db, producto_id)
+    if db_producto is None:
+        return False
+    db.delete(db_producto)
+    db.commit()
+    return True
+
+
 def count_productos(db: Session) -> int:
     return db.query(models.Producto).count()

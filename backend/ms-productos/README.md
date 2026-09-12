@@ -8,8 +8,17 @@ API REST del catálogo de productos del e-commerce. **Implementado para la prime
 - **Endpoints:**
   - `GET /health`
   - `GET /categorias`, `POST /categorias`
-  - `GET /productos`, `GET /productos?categoria_id=`, `GET /productos/{id}`, `POST /productos`
+  - `GET /productos`, `GET /productos?categoria_id=`, `GET /productos/{id}`
+  - `POST /productos`, `PUT /productos/{id}`, `DELETE /productos/{id}` (CRUD completo)
 - **Docs interactivos (Swagger/OpenAPI):** `/docs`
+
+## Colección de Postman (demo CRUD)
+
+[`postman/CloudCommerce-ms-productos.postman_collection.json`](postman/CloudCommerce-ms-productos.postman_collection.json) — Crear → Consultar → Editar → Eliminar (+ verificar que ya no existe), con tests automáticos en cada paso.
+
+1. Importa el archivo en Postman.
+2. En la colección → **Variables**, cambia `base_url` a `http://<ip-publica-mv-backend>:8001`.
+3. Corre los 5 requests en orden (o **Run collection** para correrlos todos seguidos) — `producto_id` se guarda solo después del paso 1 y se reusa en el resto.
 
 ## Cómo correr localmente
 

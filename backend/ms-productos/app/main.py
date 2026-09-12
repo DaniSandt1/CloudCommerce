@@ -64,3 +64,20 @@ def obtener_producto(producto_id: int, db: Session = Depends(get_db)):
 @app.post("/productos", response_model=schemas.Producto, tags=["productos"])
 def crear_producto(producto: schemas.ProductoCreate, db: Session = Depends(get_db)):
     return crud.create_producto(db, producto)
+
+
+@app.put("/productos/{producto_id}", response_model=schemas.Producto, tags=["productos"])
+def actualizar_producto(
+    producto_id: int, producto: schemas.ProductoCreate, db: Session = Depends(get_db)
+):
+    db_producto = crud.update_producto(db, producto_id, producto)
+    if db_producto is None:
+        raise HTTPException(status_code=404, detail="Producto no encontrado")
+    return db_producto
+
+
+@app.delete("/productos/{producto_id}", status_code=204, tags=["productos"])
+def eliminar_producto(producto_id: int, db: Session = Depends(get_db)):
+    eliminado = crud.delete_producto(db, producto_id)
+    if not eliminado:
+        raise HTTPException(status_code=404, detail="Producto no encontrado")
