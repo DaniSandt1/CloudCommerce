@@ -1,6 +1,6 @@
 package com.cloudcommerce.usuarios.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -25,7 +25,7 @@ public class Usuario {
     @Column(nullable = false, unique = true, length = 150)
     private String email;
 
-    @JsonIgnore
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @NotBlank
     @Column(name = "password_hash", nullable = false)
     private String passwordHash;
