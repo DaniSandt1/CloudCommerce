@@ -41,7 +41,7 @@ En la consola de AWS → **EC2 → Launch instance**, configura:
 | Campo | Valor | Por qué |
 |---|---|---|
 | **Name** | `cloudcommerce-backend` | Identificarla fácilmente |
-| **AMI** | Ubuntu Server 22.04 LTS | Facilita instalar Docker/Git con `apt` |
+| **AMI** | Ubuntu Server 26.04 LTS | Facilita instalar Docker/Git con `apt` |
 | **Instance type** | `t3.medium` (2 vCPU / 4 GB RAM) | Corre 2 bases de datos + 2 apps a la vez; con `t2.micro` (1 GB RAM) se queda sin memoria, sobre todo compilando `ms-usuarios` (Maven + JDK) |
 | **Key pair** | Crea una nueva (RSA, `.pem`) o usa la `vockey` de tu lab | La necesitas para SSH — descárgala, no se puede volver a descargar |
 | **Network settings → Security group** | Ver tabla abajo | Para poder acceder por SSH, probar las APIs, y dejar entrar a la MV Ingesta |
@@ -76,7 +76,8 @@ ssh -i tu-key.pem ubuntu@<ip-publica-mv-backend>
 
 ```bash
 sudo apt update
-sudo apt install -y docker.io docker-compose-plugin git
+sudo apt install -y docker.io git
+sudo apt install -y docker-compose-v2
 sudo usermod -aG docker $USER
 ```
 Cierra la sesión SSH y vuelve a entrar para que el grupo `docker` tome efecto.
