@@ -7,6 +7,7 @@ import com.cloudcommerce.usuarios.repository.UsuarioRepository;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -47,8 +48,13 @@ public class UsuarioController {
     @GetMapping("/usuarios")
     public Page<Usuario> listarUsuarios(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "50") int size) {
-        return usuarioRepository.findAll(PageRequest.of(page, size));
+            @RequestParam(defaultValue = "50") int size,
+            @RequestParam(required = false) String q) {
+        Pageable pageable = PageRequest.of(page, size);
+        if (q != null && !q.isBlank()) {
+            return usuarioRepository.findByNombreContainingIgnoreCaseOrEmailContainingIgnoreCase(q, q, pageable);
+        }
+        return usuarioRepository.findAll(pageable);
     }
 
     @GetMapping("/usuarios/{id}")

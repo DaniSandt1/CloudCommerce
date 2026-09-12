@@ -24,8 +24,11 @@ export const productosApi = {
 };
 
 export const usuariosApi = {
-  listar: (page = 0, size = 20) =>
-    request(`${USUARIOS_API_URL}/usuarios?page=${page}&size=${size}`),
+  listar: (page = 0, size = 20, q = "") => {
+    const params = new URLSearchParams({ page, size });
+    if (q) params.set("q", q);
+    return request(`${USUARIOS_API_URL}/usuarios?${params.toString()}`);
+  },
   crear: (usuario) =>
     request(`${USUARIOS_API_URL}/usuarios`, {
       method: "POST",
