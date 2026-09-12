@@ -149,7 +149,7 @@ O en la consola: EC2 → Instances → `cloudcommerce-backend` → columna **Pri
 | Campo | Valor | Por qué |
 |---|---|---|
 | **Name** | `cloudcommerce-ingesta` | Identificarla fácilmente |
-| **AMI** | Ubuntu Server 22.04 LTS | Igual que la MV Backend |
+| **AMI** | Ubuntu Server 26.04 LTS | Igual que la MV Backend |
 | **Instance type** | `t2.micro` o `t3.micro` | Solo corre 2 scripts de ingesta cortos, no necesita mucha RAM |
 | **Key pair** | La misma que la MV Backend (o una nueva) | Para SSH |
 | **Network settings → VPC/subred** | **La misma VPC y subred que la MV Backend** | Para que se alcancen por IP privada |
@@ -175,7 +175,8 @@ ssh -i tu-key.pem ubuntu@<ip-publica-mv-ingesta>
 
 ```bash
 sudo apt update
-sudo apt install -y docker.io docker-compose-plugin git
+sudo apt install -y docker.io git
+sudo apt install -y docker-compose-v2
 sudo usermod -aG docker $USER
 ```
 Cierra la sesión SSH y vuelve a entrar.
