@@ -362,24 +362,26 @@ Consola AWS → **AWS Amplify → New app → Host web app**.
 En el paso de configuración de build, activa **"Monorepo"** (o "This repository contains multiple apps" según la versión de consola) y pon:
 - **App root directory**: `frontend`
 
-Amplify debería detectar automáticamente que es un proyecto Vite/React y proponer un build spec parecido a este (ya está en el repo como [`frontend/amplify.yml`](frontend/amplify.yml), así que si te lo pide, apunta a ese archivo o pégalo):
+En modo Monorepo, Amplify exige el build spec con la clave `applications:` (uno por sub-app) y lo busca en la **raíz del repo**, no dentro de `frontend/` — por eso está commiteado como [`amplify.yml`](amplify.yml) en la raíz, no dentro de `frontend/`. Si la consola te propone un spec propio sin la clave `applications`, vas a ver el error `CustomerError: Monorepo spec provided without "applications" key` al compilar — bórralo y pega este en **App settings → Build settings → Edit**:
 ```yaml
 version: 1
-frontend:
-  phases:
-    preBuild:
-      commands:
-        - npm ci
-    build:
-      commands:
-        - npm run build
-  artifacts:
-    baseDirectory: dist
-    files:
-      - '**/*'
-  cache:
-    paths:
-      - node_modules/**/*
+applications:
+  - appRoot: frontend
+    frontend:
+      phases:
+        preBuild:
+          commands:
+            - npm ci
+        build:
+          commands:
+            - npm run build
+      artifacts:
+        baseDirectory: dist
+        files:
+          - '**/*'
+      cache:
+        paths:
+          - node_modules/**/*
 ```
 
 ## D.4 Variables de entorno
@@ -499,6 +501,14 @@ Usa `t3.medium` o superior (mínimo 4 GB RAM) para la **MV Backend**. Con menos 
 ---
 
 ## Troubleshooting de API Gateway / Amplify
+
+### "There was an issue setting up your repository" / 403 "Resource not accessible by integration"
+
+Amplify no pudo crear el webhook en GitHub — falta permiso de **Admin** sobre el repo para la cuenta/App que estás usando para conectar. Revisa que la cuenta de GitHub sea dueña o Admin del repo, y que la GitHub App "AWS Amplify" tenga acceso concedido a `CloudCommerce` (github.com/settings/installations → AWS Amplify → Configure → Repository access).
+
+### `CustomerError: Monorepo spec provided without "applications" key`
+
+Pasa cuando `AMPLIFY_MONOREPO_APP_ROOT` está seteado (modo Monorepo activado) pero el build spec que Amplify está usando no tiene la clave `applications:`. Ve a **App settings → Build settings → Edit** y pega el YAML del paso D.3 (con `applications:` y `appRoot: frontend`) — no el spec de una sola app que la consola pudo haber generado por default.
 
 ### El frontend en Amplify no carga datos (pero local sí)
 
