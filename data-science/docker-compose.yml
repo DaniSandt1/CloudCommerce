@@ -1,0 +1,16 @@
+version: "3.9"
+
+# Corre en la MV Ingesta (separada de la MV Backend). Cada servicio es un job
+# de una sola pasada (pull 100% + sube a S3), no un servicio de larga duración:
+# se ejecuta con `docker compose run --rm <servicio>`, no con `up -d`.
+
+services:
+  ingesta-productos:
+    build: ./ingesta-productos
+    env_file:
+      - ./ingesta-productos/.env
+
+  ingesta-usuarios:
+    build: ./ingesta-usuarios
+    env_file:
+      - ./ingesta-usuarios/.env

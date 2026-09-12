@@ -4,23 +4,18 @@ Contenedor Docker en Python que hace *pull* del 100% de los registros de las tab
 
 ## Cómo correr
 
-```bash
-cp .env.example .env   # completar credenciales AWS y S3_BUCKET_NAME
-pip install -r requirements.txt
-python ingesta.py
-```
-
-O con Docker (conectado a la misma red del `docker-compose` del backend):
+Corre como contenedor Docker en la **MV Ingesta** (EC2 separada de la MV Backend). `DB_HOST` debe apuntar a la IP privada de la MV Backend, no a `localhost` ni al nombre de un contenedor — ver [DEPLOYMENT.md](../../DEPLOYMENT.md).
 
 ```bash
-docker build -t ingesta-usuarios .
-docker run --rm --network docker-compose_default --env-file .env ingesta-usuarios
+cp .env.example .env   # completar DB_HOST (IP privada MV Backend) y S3_BUCKET_NAME
+cd ..                  # data-science/
+docker compose build ingesta-usuarios
+docker compose run --rm ingesta-usuarios
 ```
+
+Las credenciales AWS se toman del rol IAM de la instancia (`LabInstanceProfile`) — deja vacíos `AWS_ACCESS_KEY_ID`/`AWS_SECRET_ACCESS_KEY` en `.env`.
 
 ## Estado
 
-✅ Bucket `cloudcommerce-datalake` creado y probado — ejecutado desde la EC2, sube correctamente el CSV con los 20,000 usuarios (+ direcciones) a `s3://cloudcommerce-datalake/usuarios/`.
-
-## Pendiente
-
-- [ ] Mover la ejecución a una MV "ingesta" dedicada (por ahora corre en la misma EC2 del backend)
+✅ Bucket `cloudcommerce-datalake` creado y probado — sube correctamente el CSV con los 20,000 usuarios (+ direcciones) a `s3://cloudcommerce-datalake/usuarios/`.
+✅ Separado a su propia MV Ingesta (ya no corre en la misma EC2 del backend).

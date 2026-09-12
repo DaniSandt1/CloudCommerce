@@ -1,16 +1,40 @@
 # Guía de Despliegue en AWS (AWS Academy Learner Lab)
 
-Esta guía cubre todo lo necesario para levantar el backend en una instancia EC2, correr el frontend contra ella, y subir los datos a S3 — el alcance de la **primera entrega** (2 microservicios + frontend + ingesta a S3). Pensada para que cualquiera que clone este repo pueda reproducirlo sin depender de configuración previa.
+Esta guía cubre el alcance del **avance (Hito 1)**: 2 microservicios + frontend + ingesta a S3, repartidos en **2 máquinas virtuales separadas**, tal como lo pide la rúbrica de avance:
+
+- **Back-End**: microservicios implementados parcialmente, con al menos una base de datos conectada y consultas básicas funcionando.
+- **Data Science**: máquina virtual de ingesta **configurada** (propia, separada del backend), bucket S3 creado y al menos un contenedor de ingesta funcionando con datos cargados en S3.
+
+## Arquitectura de esta entrega
+
+```
+MV Backend (EC2 #1)                     MV Ingesta (EC2 #2)
+┌─────────────────────────┐             ┌───────────────────────────┐
+│ ms-productos :8001       │             │ ingesta-productos (docker)│
+│ mysql-productos :3306    │◄────────────┤ ingesta-usuarios  (docker)│
+│ ms-usuarios    :8002      │  DB_HOST =  │                           │
+│ postgres-usuarios :5432   │  IP privada │ boto3 vía IAM role        │
+└─────────────────────────┘  MV Backend  └──────────┬────────────────┘
+                                                      │
+                                                      ▼
+                                                 Bucket S3
+```
+
+Las 2 MV deben estar en la misma VPC/subred (la default de Academy sirve) para que la MV Ingesta llegue a la MV Backend por **IP privada**, sin exponer las bases de datos a internet.
+
+> La separación en 2 MV de *producción* + balanceador + 3ra MV de bases de datos (arquitectura final, diapositiva 8) es para el **Hito 2**. Para este avance el backend se mantiene en 1 sola MV.
 
 ## Prerrequisitos
 
 - Cuenta de AWS Academy (Learner Lab) con la sesión iniciada ("Start Lab").
 - Este repositorio clonado o accesible en GitHub.
-- Docker **no** es necesario en tu máquina local para esta parte — todo el backend corre dentro de la instancia EC2. Localmente solo necesitas Node.js para correr el frontend.
+- Docker **no** es necesario en tu máquina local — todo corre dentro de las 2 EC2. Localmente solo necesitas Node.js para correr el frontend.
 
 ---
 
-## 1. Lanzar la instancia EC2
+# Parte A — MV Backend
+
+## A.1 Lanzar la instancia EC2
 
 En la consola de AWS → **EC2 → Launch instance**, configura:
 
@@ -20,70 +44,42 @@ En la consola de AWS → **EC2 → Launch instance**, configura:
 | **AMI** | Ubuntu Server 22.04 LTS | Facilita instalar Docker/Git con `apt` |
 | **Instance type** | `t3.medium` (2 vCPU / 4 GB RAM) | Corre 2 bases de datos + 2 apps a la vez; con `t2.micro` (1 GB RAM) se queda sin memoria, sobre todo compilando `ms-usuarios` (Maven + JDK) |
 | **Key pair** | Crea una nueva (RSA, `.pem`) o usa la `vockey` de tu lab | La necesitas para SSH — descárgala, no se puede volver a descargar |
-| **Network settings → Security group** | Ver tabla abajo | Para poder acceder por SSH y probar las APIs desde tu navegador |
+| **Network settings → Security group** | Ver tabla abajo | Para poder acceder por SSH, probar las APIs, y dejar entrar a la MV Ingesta |
 | **Storage** | Sube de 8 GB (default) a **20–30 GB** | Las imágenes Docker (mysql, postgres, maven+jdk) + volúmenes de datos pesan más de lo que parece |
-| **Advanced details → IAM instance profile** | `LabInstanceProfile` (el rol que trae tu Learner Lab) | Da permisos de S3/Glue a la instancia sin tener que manejar credenciales a mano — lo necesitarás en el paso de ingesta a S3 |
+| **Advanced details → IAM instance profile** | `LabInstanceProfile` | Rol de tu Learner Lab (no imprescindible en esta MV, pero no hace daño) |
 
-### Reglas del Security Group
+### Reglas del Security Group (MV Backend)
 
 | Type | Port range | Source | Para qué |
 |---|---|---|---|
 | SSH | 22 | My IP (o `0.0.0.0/0` si no tienes IP fija) | Conectarte por terminal |
 | Custom TCP | 8001 | `0.0.0.0/0` | Probar `ms-productos` desde tu navegador/frontend |
 | Custom TCP | 8002 | `0.0.0.0/0` | Probar `ms-usuarios` desde tu navegador/frontend |
+| Custom TCP | 3306 (MySQL) | **IP privada de la MV Ingesta**/32 | Que la MV Ingesta pueda leer `mysql-productos` |
+| Custom TCP | 5432 (PostgreSQL) | **IP privada de la MV Ingesta**/32 | Que la MV Ingesta pueda leer `postgres-usuarios` |
 
-⚠️ En AWS Academy Learner Lab, al terminar la sesión la instancia se **detiene** (no se borra), pero pierde la IP pública si no le asignas una **Elastic IP**. Si quieres que la IP no cambie entre sesiones (útil para la asesoría con el ACL), asígnale una Elastic IP desde EC2 → Elastic IPs → Allocate → Associate.
+⚠️ Las reglas de 3306/5432 las agregas **después** de lanzar la MV Ingesta (Parte B), cuando ya conoces su IP privada — ver paso B.4. No abras 3306/5432 a `0.0.0.0/0`: son las bases de datos, deben quedar accesibles solo desde la MV Ingesta.
 
----
+⚠️ En AWS Academy Learner Lab, al terminar la sesión la instancia se **detiene** (no se borra), pero pierde la IP pública si no le asignas una **Elastic IP**. Asígnale una desde EC2 → Elastic IPs → Allocate → Associate si quieres que no cambie entre sesiones (útil para la asesoría con el ACL).
 
-## 2. Conectarte a la instancia
+## A.2 Conectarte a la instancia
 
-**Opción A — EC2 Instance Connect** (desde el navegador, botón "Connect" en la consola de EC2): no necesita el `.pem`, ideal para pruebas rápidas.
+**Opción A — EC2 Instance Connect** (botón "Connect" en la consola de EC2): no necesita el `.pem`, ideal para pruebas rápidas.
 
 **Opción B — SSH desde tu terminal:**
 ```bash
 chmod 400 tu-key.pem
-ssh -i tu-key.pem ubuntu@<ip-publica-de-la-instancia>
+ssh -i tu-key.pem ubuntu@<ip-publica-mv-backend>
 ```
 
----
-
-## Reinicio rápido (ya con todo instalado)
-
-Si ya hiciste los pasos 1-7 una vez (Docker, repo clonado, microservicios corriendo, ingesta a S3), retomar el trabajo en una sesión nueva es mucho más corto:
-
-1. **Prender la EC2** (si estaba detenida): AWS Console → EC2 → **Start instance**. Espera ~30-60 seg y copia la **Public IPv4** actual.
-2. **Conectarte** por SSH (paso 2) o EC2 Instance Connect.
-3. **Verificar que los contenedores ya están arriba** — como el `docker-compose.yml` tiene `restart: unless-stopped`, Docker los vuelve a levantar solos apenas arranca el daemon junto con la instancia:
-   ```bash
-   docker ps
-   ```
-   Si ya ves `ms-productos`, `ms-usuarios`, `mysql-productos` y `postgres-usuarios` corriendo, no hace falta nada más. Si no aparecen:
-   ```bash
-   cd ~/CloudCommerce/backend/docker-compose
-   docker compose up -d      # sin --build, las imágenes ya existen
-   ```
-   Confirma con `curl localhost:8001/health` y `curl localhost:8002/health`.
-4. **Frontend** (en tu laptop): si la IP pública cambió, actualiza `frontend/.env` con la IP nueva; si no cambió, solo corre `npm run dev`.
-
-### 💡 Sugerencia: asígnale una Elastic IP para no repetir el paso del `.env`
-
-Sin Elastic IP, la IP pública de la EC2 cambia cada vez que la detienes y la vuelves a prender, obligándote a editar `frontend/.env` en cada sesión.
-
-**EC2 → Elastic IPs → Allocate Elastic IP address → Allocate** → luego **Actions → Associate Elastic IP address** → selecciona tu instancia.
-
-Con la Elastic IP asociada, la IP queda fija entre inicios/detenciones y configuras `frontend/.env` una sola vez.
-
----
-
-## 3. Instalar Docker y Git
+## A.3 Instalar Docker y Git
 
 ```bash
 sudo apt update
 sudo apt install -y docker.io docker-compose-plugin git
 sudo usermod -aG docker $USER
 ```
-Cierra la sesión SSH y vuelve a entrar para que el grupo `docker` tome efecto (evita tener que usar `sudo` en cada comando docker).
+Cierra la sesión SSH y vuelve a entrar para que el grupo `docker` tome efecto.
 
 Verifica:
 ```bash
@@ -91,25 +87,21 @@ docker --version
 docker compose version
 ```
 
----
-
-## 4. Clonar el repositorio
+## A.4 Clonar el repositorio
 
 ```bash
 git clone https://github.com/DaniSandt1/CloudCommerce.git
 cd CloudCommerce
 ```
 
----
-
-## 5. Levantar los microservicios
+## A.5 Levantar los microservicios
 
 ```bash
 cd backend/docker-compose
 docker compose up -d --build
 ```
 
-La primera vez tarda varios minutos: descarga las imágenes de MySQL/PostgreSQL y compila `ms-usuarios` con Maven dentro del Dockerfile. Verifica el progreso:
+La primera vez tarda varios minutos: descarga las imágenes de MySQL/PostgreSQL y compila `ms-usuarios` con Maven. Verifica el progreso:
 ```bash
 docker compose ps
 docker compose logs -f ms-usuarios   # Ctrl+C para salir
@@ -130,64 +122,97 @@ Desde la propia EC2:
 curl localhost:8001/health   # {"status":"ok","total_productos":20000}
 curl localhost:8002/health   # {"status":"ok","total_usuarios":20000}
 ```
-Desde tu navegador (con la IP pública de la instancia):
+Desde tu navegador:
 ```
-http://<ip-publica-ec2>:8001/docs             # Swagger de ms-productos
-http://<ip-publica-ec2>:8002/swagger-ui.html  # Swagger de ms-usuarios
+http://<ip-publica-mv-backend>:8001/docs             # Swagger de ms-productos
+http://<ip-publica-mv-backend>:8002/swagger-ui.html  # Swagger de ms-usuarios
 ```
+
+## A.6 Anota la IP privada de esta MV
+
+La necesitas en la Parte B (`DB_HOST` de la ingesta):
+
+```bash
+curl -s http://169.254.169.254/latest/meta-data/local-ipv4; echo
+```
+O en la consola: EC2 → Instances → `cloudcommerce-backend` → columna **Private IPv4 address**.
 
 ---
 
-## 6. Correr el frontend (local, apuntando a la EC2)
+# Parte B — MV Ingesta
 
-El frontend corre en tu propia máquina (no en la EC2) para esta entrega — ver la sección **"¿Por qué el frontend no va en Amplify todavía?"** más abajo.
+## B.1 Lanzar la instancia EC2
+
+**EC2 → Launch instance**:
+
+| Campo | Valor | Por qué |
+|---|---|---|
+| **Name** | `cloudcommerce-ingesta` | Identificarla fácilmente |
+| **AMI** | Ubuntu Server 22.04 LTS | Igual que la MV Backend |
+| **Instance type** | `t2.micro` o `t3.micro` | Solo corre 2 scripts de ingesta cortos, no necesita mucha RAM |
+| **Key pair** | La misma que la MV Backend (o una nueva) | Para SSH |
+| **Network settings → VPC/subred** | **La misma VPC y subred que la MV Backend** | Para que se alcancen por IP privada |
+| **Network settings → Security group** | Ver tabla abajo | |
+| **Storage** | 8-10 GB (default) | Solo imágenes Python pequeñas |
+| **Advanced details → IAM instance profile** | `LabInstanceProfile` | **Obligatorio** — da permisos de S3 sin manejar credenciales a mano |
+
+### Reglas del Security Group (MV Ingesta)
+
+| Type | Port range | Source | Para qué |
+|---|---|---|---|
+| SSH | 22 | My IP (o `0.0.0.0/0`) | Conectarte por terminal |
+
+No necesita puertos de entrada adicionales: solo hace conexiones salientes hacia la MV Backend (3306/5432) y hacia S3 (443), que están permitidas por defecto.
+
+## B.2 Conectarte a la instancia
 
 ```bash
-cd frontend
-cp .env.example .env
+ssh -i tu-key.pem ubuntu@<ip-publica-mv-ingesta>
 ```
-Edita `.env` y reemplaza `localhost` por la IP pública de tu EC2:
-```
-VITE_PRODUCTOS_API_URL=http://<ip-publica-ec2>:8001
-VITE_USUARIOS_API_URL=http://<ip-publica-ec2>:8002
-```
+
+## B.3 Instalar Docker y Git
+
 ```bash
-npm install
-npm run dev
+sudo apt update
+sudo apt install -y docker.io docker-compose-plugin git
+sudo usermod -aG docker $USER
+```
+Cierra la sesión SSH y vuelve a entrar.
+
+## B.4 Habilitar el acceso a las bases de datos de la MV Backend
+
+1. Anota la **IP privada de esta MV Ingesta**:
+   ```bash
+   curl -s http://169.254.169.254/latest/meta-data/local-ipv4; echo
+   ```
+2. Ve a la consola → EC2 → Security Groups → el grupo de `cloudcommerce-backend` → **Edit inbound rules** → agrega las 2 reglas de la tabla del paso A.1 (3306 y 5432) usando esta IP privada `/32` como *source*.
+
+## B.5 Clonar el repositorio
+
+```bash
+git clone https://github.com/DaniSandt1/CloudCommerce.git
+cd CloudCommerce/data-science
 ```
 
-Abre la URL que te indique (normalmente `http://localhost:5173`) **en una ventana de navegador normal** (Chrome/Edge/Firefox) — no en la vista previa integrada de tu editor (VS Code "Simple Browser"), porque su webview sandboxeado puede bloquear los `fetch` y mostrar "Failed to fetch" aunque el backend esté perfectamente accesible.
+## B.6 Crear el bucket S3
 
----
+Consola: **S3 → Create bucket** → nombre único globalmente (ej. `cloudcommerce-datalake-tunombre123`), misma región que tus EC2 (normalmente `us-east-1` en Academy).
 
-## 7. Crear el bucket S3 y subir los datos (ingesta)
-
-### 7.1 Crear el bucket
-
-Consola: **S3 → Create bucket** → nombre único globalmente (ej. `cloudcommerce-datalake-tunombre123`), misma región que tu EC2 (normalmente `us-east-1` en Academy).
-
-O por CLI desde la EC2 (ya tiene permisos por el `LabInstanceProfile`):
+O por CLI desde esta misma MV (ya tiene permisos por el `LabInstanceProfile`):
 ```bash
 aws s3 mb s3://cloudcommerce-datalake --region us-east-1
 ```
 
-### 7.2 Correr las ingestas
-
-Se ejecutan **directo en la EC2** (no dentro de Docker), para que tomen las credenciales del rol IAM automáticamente vía el servicio de metadata de la instancia, y usando los puertos de las bases de datos ya publicados al host (3306 y 5432).
+## B.7 Configurar y correr los contenedores de ingesta
 
 ```bash
-sudo apt install -y python3-pip python3-venv
-
-cd ~/CloudCommerce/data-science/ingesta-productos
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
+cd ingesta-productos
 cp .env.example .env
 nano .env
 ```
-Deja en el `.env`:
+Completa:
 ```
-DB_HOST=localhost
+DB_HOST=<ip-privada-mv-backend>   # del paso A.6
 DB_PORT=3306
 DB_USER=productos_user
 DB_PASSWORD=productos_pass
@@ -198,25 +223,16 @@ S3_PREFIX=productos
 
 AWS_DEFAULT_REGION=us-east-1
 ```
-**Borra o deja vacías** las líneas `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` — al correr en la EC2, boto3 toma las credenciales del rol IAM automáticamente.
+**Deja vacías** `AWS_ACCESS_KEY_ID`/`AWS_SECRET_ACCESS_KEY` — el contenedor toma las credenciales del rol IAM de la instancia automáticamente vía el servicio de metadata (accesible desde Docker en modo bridge por defecto).
 
+Repite para usuarios:
 ```bash
-export $(grep -v '^#' .env | xargs)
-python ingesta.py
-deactivate
-```
-
-Repite lo mismo para usuarios:
-```bash
-cd ~/CloudCommerce/data-science/ingesta-usuarios
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
+cd ../ingesta-usuarios
 cp .env.example .env
 nano .env
 ```
 ```
-DB_HOST=localhost
+DB_HOST=<ip-privada-mv-backend>
 DB_PORT=5432
 DB_USER=usuarios_user
 DB_PASSWORD=usuarios_pass
@@ -227,18 +243,82 @@ S3_PREFIX=usuarios
 
 AWS_DEFAULT_REGION=us-east-1
 ```
-```bash
-export $(grep -v '^#' .env | xargs)
-python ingesta.py
-```
 
-### 7.3 Verificar
+Ahora, desde `data-science/` (un nivel arriba), construye y corre ambos contenedores:
+```bash
+cd ..   # data-science/
+docker compose build
+docker compose run --rm ingesta-productos
+docker compose run --rm ingesta-usuarios
+```
+Cada corrida imprime `Extraídos N productos...` / `Extraídos N registros...` y `Subido s3://...`.
+
+## B.8 Verificar
 
 ```bash
 aws s3 ls s3://cloudcommerce-datalake/productos/
 aws s3 ls s3://cloudcommerce-datalake/usuarios/
 ```
-Deberías ver un `.csv` en cada carpeta (también visible desde la consola de S3 — sirve como captura para el informe).
+Deberías ver un `.csv` en cada carpeta (también visible desde la consola de S3 — sirve como captura para el informe/asesoría).
+
+---
+
+## 6. Correr el frontend (local, apuntando a la MV Backend)
+
+El frontend corre en tu propia máquina (no en ninguna EC2) para esta entrega — ver la sección **"¿Por qué el frontend no va en Amplify todavía?"** más abajo.
+
+```bash
+cd frontend
+cp .env.example .env
+```
+Edita `.env` y reemplaza `localhost` por la **IP pública** de la MV Backend:
+```
+VITE_PRODUCTOS_API_URL=http://<ip-publica-mv-backend>:8001
+VITE_USUARIOS_API_URL=http://<ip-publica-mv-backend>:8002
+```
+```bash
+npm install
+npm run dev
+```
+
+Abre la URL que te indique (normalmente `http://localhost:5173`) **en una ventana de navegador normal** (Chrome/Edge/Firefox) — no en la vista previa integrada de tu editor (VS Code "Simple Browser"), porque su webview sandboxeado puede bloquear los `fetch` y mostrar "Failed to fetch" aunque el backend esté perfectamente accesible.
+
+---
+
+## Reinicio rápido (ya con todo instalado)
+
+Si ya hiciste los pasos de las Partes A y B una vez, retomar el trabajo en una sesión nueva es corto. **Prende primero la MV Backend**, luego la MV Ingesta (necesitas su IP para el frontend y, si cambió, para reconfigurar `.env` de la ingesta).
+
+### MV Backend
+1. AWS Console → EC2 → **Start instance** (`cloudcommerce-backend`). Espera ~30-60 seg y copia la **Public IPv4** actual.
+2. Conéctate por SSH o EC2 Instance Connect.
+3. Verifica que los contenedores ya están arriba (`restart: unless-stopped` los revive solos):
+   ```bash
+   docker ps
+   ```
+   Si no aparecen `ms-productos`, `ms-usuarios`, `mysql-productos`, `postgres-usuarios`:
+   ```bash
+   cd ~/CloudCommerce/backend/docker-compose
+   docker compose up -d      # sin --build, las imágenes ya existen
+   ```
+   Confirma con `curl localhost:8001/health` y `curl localhost:8002/health`.
+
+### MV Ingesta
+1. AWS Console → EC2 → **Start instance** (`cloudcommerce-ingesta`).
+2. Si la **IP privada de la MV Backend cambió**, actualiza `DB_HOST` en `data-science/ingesta-productos/.env` y `data-science/ingesta-usuarios/.env`, y la regla del Security Group del paso B.4.
+3. Vuelve a correr la ingesta cuando quieras refrescar los datos en S3:
+   ```bash
+   cd ~/CloudCommerce/data-science
+   docker compose run --rm ingesta-productos
+   docker compose run --rm ingesta-usuarios
+   ```
+
+### Frontend (en tu laptop)
+Si la IP pública de la MV Backend cambió, actualiza `frontend/.env`; si no, solo `npm run dev`.
+
+### 💡 Sugerencia: Elastic IP para no repetir el paso del `.env`
+
+Sin Elastic IP, la IP pública de una EC2 cambia cada vez que la detienes y la vuelves a prender. Asígnale una Elastic IP a la **MV Backend** (EC2 → Elastic IPs → Allocate → Associate) para no tener que editar `frontend/.env` en cada sesión. Las IPs **privadas** normalmente sí se mantienen fijas mientras no borres la instancia, así que `DB_HOST` en la ingesta rara vez necesita cambiar.
 
 ---
 
@@ -248,7 +328,7 @@ Deberías ver un `.csv` en cada carpeta (también visible desde la consola de S3
 
 Sigue este orden:
 
-1. **¿El contenedor está arriba?**
+1. **¿El contenedor está arriba?** (en la MV Backend)
    ```bash
    docker compose ps
    ```
@@ -258,7 +338,7 @@ Sigue este orden:
    ```
    (Spring Boot puede tardar unos minutos en levantar la primera vez.)
 
-2. **¿Responde dentro de la EC2?**
+2. **¿Responde dentro de la MV Backend?**
    ```bash
    curl -v localhost:8001/health
    curl -v localhost:8002/health
@@ -267,36 +347,49 @@ Sigue este orden:
 
 3. **¿Responde desde afuera?** Desde tu laptop:
    ```bash
-   curl -v http://<ip-publica-ec2>:8001/health
-   curl -v http://<ip-publica-ec2>:8002/health
+   curl -v http://<ip-publica-mv-backend>:8001/health
+   curl -v http://<ip-publica-mv-backend>:8002/health
    ```
-   Si da timeout/connection refused aquí pero funcionó en el paso 2, **falta abrir el puerto correspondiente en el Security Group** (causa más común).
+   Si da timeout/connection refused aquí pero funcionó en el paso 2, **falta abrir el puerto correspondiente en el Security Group de la MV Backend** (causa más común).
 
 4. **¿El `.env` del frontend apunta bien?**
    ```bash
    cat frontend/.env
    ```
-   Debe usar la IP pública de la EC2 (no `localhost`) y el puerto correcto para cada servicio. Si lo editaste, **reinicia** `npm run dev` — Vite solo lee `.env` al arrancar.
+   Debe usar la IP pública de la MV Backend (no `localhost`) y el puerto correcto para cada servicio. Si lo editaste, **reinicia** `npm run dev` — Vite solo lee `.env` al arrancar.
 
-5. **¿Estás viendo la app en la vista previa del editor?** Ábrela en una ventana de navegador real (ver sección 6) — el webview de VS Code puede bloquear los `fetch` aunque todo lo demás esté bien.
+5. **¿Estás viendo la app en la vista previa del editor?** Ábrela en una ventana de navegador real — el webview de VS Code puede bloquear los `fetch` aunque todo lo demás esté bien.
+
+### La ingesta falla con timeout/connection refused al conectar a la BD
+
+- Confirma que **ambas MV están en la misma VPC/subred** (si usaste la VPC default de Academy para las dos, ya lo están).
+- Confirma que el Security Group de la **MV Backend** tiene las reglas de entrada 3306 y 5432 con source = IP privada de la MV Ingesta (paso B.4), no la IP pública.
+- Confirma que `DB_HOST` en el `.env` de cada ingesta es la IP **privada** de la MV Backend, y que no cambió tras un reinicio de esa instancia.
+- Prueba conectividad cruda desde la MV Ingesta: `nc -zv <ip-privada-mv-backend> 3306` y `... 5432`.
+
+### La ingesta falla al subir a S3 (credenciales)
+
+- Verifica que la MV Ingesta tenga el **IAM instance profile** `LabInstanceProfile` asociado (EC2 → Instances → selecciona la instancia → Actions → Security → Modify IAM role, si falta).
+- Confirma que `AWS_ACCESS_KEY_ID`/`AWS_SECRET_ACCESS_KEY` estén **vacíos** en el `.env` (si tienen un valor viejo/inválido, boto3 los usa en vez del rol).
+- Prueba desde la MV Ingesta (fuera de Docker): `aws sts get-caller-identity` — debe responder con el rol del lab, no un error.
 
 ### `mvn`/build de `ms-usuarios` muy lento o falla por memoria
 
-Usa `t3.medium` o superior (mínimo 4 GB RAM). Con menos memoria, la compilación de Maven dentro del `docker compose up --build` puede colgarse o el contenedor puede reiniciarse en loop.
+Usa `t3.medium` o superior (mínimo 4 GB RAM) para la **MV Backend**. Con menos memoria, la compilación de Maven dentro del `docker compose up --build` puede colgarse o el contenedor puede reiniciarse en loop.
 
 ---
 
 ## ¿Por qué el frontend no va en AWS Amplify todavía?
 
-Amplify sirve la web siempre por **HTTPS**. El backend en la EC2 responde por **HTTP plano** (sin certificado). Si el frontend estuviera en Amplify (https) y llamara a `http://<ip-ec2>:8001`, el navegador bloquearía la petición por **mixed content** — el mismo "Failed to fetch" pero por otra causa, y esta vez no hay forma de arreglarlo desde el frontend.
+Amplify sirve la web siempre por **HTTPS**. El backend en la MV Backend responde por **HTTP plano** (sin certificado). Si el frontend estuviera en Amplify (https) y llamara a `http://<ip-mv-backend>:8001`, el navegador bloquearía la petición por **mixed content** — el mismo "Failed to fetch" pero por otra causa, y esta vez no hay forma de arreglarlo desde el frontend.
 
 Por eso el enunciado pide montar **AWS API Gateway** (que expone las APIs por https) delante del backend antes de desplegar en Amplify. Ese es el orden para la entrega final (Hito 2):
 
-1. Poner API Gateway (https) delante de los microservicios en la EC2.
+1. Poner API Gateway (https) delante de los microservicios repartidos en las 2 MV de producción + balanceador.
 2. Actualizar `frontend/.env` para usar las URLs de API Gateway en vez de `ip:puerto` directo.
 3. Recién ahí desplegar el frontend en AWS Amplify.
 
-Para esta primera entrega, correr el frontend en `localhost` (http) contra la EC2 (http) es válido y evita el problema de mixed content.
+Para este avance, correr el frontend en `localhost` (http) contra la MV Backend (http) es válido y evita el problema de mixed content.
 
 ---
 
@@ -307,7 +400,7 @@ Para esta primera entrega, correr el frontend en `localhost` (http) contra la EC
 - [ ] Mover las bases de datos a una 3ra MV privada (no pública)
 - [ ] AWS API Gateway (https) público delante del balanceador
 - [ ] Desplegar el frontend en AWS Amplify (después del API Gateway)
-- [ ] MV "ingesta" dedicada para los 3 contenedores de ingesta
+- [x] MV "ingesta" dedicada para los contenedores de ingesta (`ingesta-productos`, `ingesta-usuarios`) — falta `ingesta-pedidos` cuando exista `ms-pedidos`
 - [ ] AWS Glue (catálogo de datos) + diagrama E/R del catálogo
 - [ ] Mínimo 4 consultas SQL + 2 vistas en Athena
 - [ ] Diagrama de Arquitectura de Solución en draw.io

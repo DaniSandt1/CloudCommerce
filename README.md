@@ -56,14 +56,14 @@ Data Science: MV Ingesta (3 contenedores docker en Python, pull 100%) → Bucket
 
 ## Estado actual
 
-**Alcance de la primera entrega (indicación del asesor Santiago): COMPLETO ✅** — 2 microservicios funcionando (`ms-productos` y `ms-usuarios`) + frontend que los consuma + datos subidos a S3.
+**Avance (Hito 1): COMPLETO ✅** — 2 microservicios funcionando (`ms-productos` y `ms-usuarios`) + frontend que los consuma + MV Ingesta separada con datos subidos a S3, repartido en **2 máquinas virtuales** (MV Backend / MV Ingesta) como pide la rúbrica de avance.
 
-- ✅ `ms-productos` (Python/FastAPI + MySQL) — desplegado en EC2, 20,000 productos cargados
-- ✅ `ms-usuarios` (Java/Spring Boot + PostgreSQL) — desplegado en EC2, 20,000 usuarios cargados
-- ✅ `frontend` (React) consumiendo ambos — probado end-to-end contra la EC2
-- ✅ `ingesta-productos` e `ingesta-usuarios` (Python → S3) — bucket `cloudcommerce-datalake` creado, ambos CSV subidos correctamente
+- ✅ `ms-productos` (Python/FastAPI + MySQL) — desplegado en MV Backend, 20,000 productos cargados
+- ✅ `ms-usuarios` (Java/Spring Boot + PostgreSQL) — desplegado en MV Backend, 20,000 usuarios cargados
+- ✅ `frontend` (React) consumiendo ambos — probado end-to-end contra la MV Backend
+- ✅ `ingesta-productos` e `ingesta-usuarios` (Python → S3) — corren como contenedores en su propia **MV Ingesta**, bucket `cloudcommerce-datalake` creado, ambos CSV subidos correctamente
 - ⏳ `ms-pedidos`, `ms-checkout`, `ms-analitica` — pendientes para la entrega final (Hito 2)
-- ⏳ AWS Amplify, API Gateway, balanceador de carga, MV separadas para BD e ingesta — pendientes para la entrega final (Hito 2)
+- ⏳ AWS Amplify, API Gateway, balanceador de carga, 2 MV de producción + 3ra MV de BD — pendientes para la entrega final (Hito 2)
 
 ### Cómo correrlo (AWS + local)
 
