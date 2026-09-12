@@ -32,7 +32,7 @@ def extraer_usuarios():
     )
     try:
         with conn.cursor(row_factory=dict_row) as cursor:
-              cursor.execute(
+            cursor.execute(
                 """
                 SELECT u.id, u.nombre, u.email, u.fecha_registro,
                        d.calle, d.ciudad, d.pais
@@ -43,7 +43,6 @@ def extraer_usuarios():
             return cursor.fetchall()
     finally:
         conn.close()
-
 
 def filas_a_csv(filas):
     buffer = io.StringIO()
