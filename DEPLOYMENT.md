@@ -265,9 +265,9 @@ Deberías ver un `.csv` en cada carpeta (también visible desde la consola de S3
 
 ---
 
-## 6. Correr el frontend (local, apuntando a la MV Backend)
+## Desarrollo local del frontend (opcional, para iterar rápido)
 
-El frontend corre en tu propia máquina (no en ninguna EC2) para esta entrega — ver la sección **"¿Por qué el frontend no va en Amplify todavía?"** más abajo.
+Antes de montar Amplify, puedes seguir corriendo el frontend en tu laptop apuntando directo a la MV Backend — útil mientras desarrollas, aunque para la entrega real el frontend vive en Amplify (Parte D).
 
 ```bash
 cd frontend
@@ -284,6 +284,123 @@ npm run dev
 ```
 
 Abre la URL que te indique (normalmente `http://localhost:5173`) **en una ventana de navegador normal** (Chrome/Edge/Firefox) — no en la vista previa integrada de tu editor (VS Code "Simple Browser"), porque su webview sandboxeado puede bloquear los `fetch` y mostrar "Failed to fetch" aunque el backend esté perfectamente accesible.
+
+Esto solo funciona en `http://localhost` porque ahí no hay mixed content (localhost es http, la MV Backend es http). El sitio en Amplify (https) no puede llamar directo al `ip:puerto` de la MV Backend por esa misma razón — ver Parte C.
+
+---
+
+# Parte C — API Gateway (exponer el backend por HTTPS)
+
+Amplify sirve siempre por HTTPS. Si el frontend en Amplify llamara directo a `http://<ip-mv-backend>:8001`, el navegador bloquearía la petición por **mixed content**. API Gateway pone una URL HTTPS pública delante de cada microservicio, sin tocar una sola línea de código del backend — es la pieza que el enunciado pide investigar e implementar.
+
+## C.1 Crear la HTTP API
+
+Consola AWS → **API Gateway → Create API → HTTP API → Build**.
+- Name: `cloudcommerce-api`
+- En el paso "Integrations" del wizard, dale **Next** sin agregar nada — las integraciones se configuran después, por ruta.
+- Termina el wizard con **Create**. HTTP APIs se auto-despliegan al stage `$default`, no necesitas un paso de "Deploy" manual.
+
+## C.2 Habilitar CORS a nivel de API Gateway
+
+En tu API → **CORS → Configure**:
+- Access-Control-Allow-Origin: `*` (para el avance; restríngelo al dominio de Amplify cuando lo tengas, en la entrega final)
+- Access-Control-Allow-Headers: `*`
+- Access-Control-Allow-Methods: `GET, POST, OPTIONS`
+
+Con esto API Gateway responde el preflight `OPTIONS` él mismo, sin reenviarlo al backend.
+
+## C.3 Ruta e integración hacia `ms-productos`
+
+En tu API → **Routes → Create**:
+- Method: `ANY`, Path: `/productos-api/{proxy+}`
+- **Attach integration → Create and attach an integration**:
+  - Integration type: `HTTP`
+  - Integration URL: `http://<ip-publica-mv-backend>:8001/{proxy}`
+  - Method: `ANY`
+
+## C.4 Ruta e integración hacia `ms-usuarios`
+
+Repite en **Routes → Create**:
+- Method: `ANY`, Path: `/usuarios-api/{proxy+}`
+- Integration type: `HTTP`, Integration URL: `http://<ip-publica-mv-backend>:8002/{proxy}`, Method: `ANY`
+
+## C.5 Obtener la Invoke URL
+
+En tu API → pantalla principal, copia la **Invoke URL** (algo como `https://abc123xyz.execute-api.us-east-1.amazonaws.com`). Tus dos URLs finales son:
+```
+https://abc123xyz.execute-api.us-east-1.amazonaws.com/productos-api
+https://abc123xyz.execute-api.us-east-1.amazonaws.com/usuarios-api
+```
+
+## C.6 Verificar
+
+Desde tu laptop (fuera de la EC2, esto ya es HTTPS público):
+```bash
+curl https://abc123xyz.execute-api.us-east-1.amazonaws.com/productos-api/health
+curl https://abc123xyz.execute-api.us-east-1.amazonaws.com/usuarios-api/health
+```
+Ambos deben responder igual que los `curl localhost:8001/health` / `:8002/health` de la Parte A.
+
+⚠️ Si la MV Backend no tiene **Elastic IP** (paso A.1), su IP pública cambia al reiniciarla — y con eso la Integration URL de C.3/C.4 queda apuntando a una IP vieja. Asígnale una Elastic IP ahora si no lo hiciste; si la IP cambia, edita la Integration URL en **API Gateway → Routes → (la ruta) → Integration details**.
+
+---
+
+# Parte D — AWS Amplify (Frontend)
+
+## D.1 El repo ya está en GitHub
+
+Amplify se conecta directo al repo — no necesitas subir nada manualmente, solo tener el último `git push` hecho (ver [D.4](#d4-variables-de-entorno) para las URLs de API Gateway que vas a necesitar del paso C.5).
+
+## D.2 Crear la app en Amplify
+
+Consola AWS → **AWS Amplify → New app → Host web app**.
+- Elige **GitHub** → autoriza a AWS Amplify sobre tu cuenta/org de GitHub si te lo pide.
+- Selecciona el repositorio `CloudCommerce` y la rama `main`.
+
+## D.3 Configurar como monorepo (el frontend vive en `frontend/`)
+
+En el paso de configuración de build, activa **"Monorepo"** (o "This repository contains multiple apps" según la versión de consola) y pon:
+- **App root directory**: `frontend`
+
+Amplify debería detectar automáticamente que es un proyecto Vite/React y proponer un build spec parecido a este (ya está en el repo como [`frontend/amplify.yml`](frontend/amplify.yml), así que si te lo pide, apunta a ese archivo o pégalo):
+```yaml
+version: 1
+frontend:
+  phases:
+    preBuild:
+      commands:
+        - npm ci
+    build:
+      commands:
+        - npm run build
+  artifacts:
+    baseDirectory: dist
+    files:
+      - '**/*'
+  cache:
+    paths:
+      - node_modules/**/*
+```
+
+## D.4 Variables de entorno
+
+En el mismo asistente (o después en **App settings → Environment variables**), agrega, con las URLs del paso C.5:
+```
+VITE_PRODUCTOS_API_URL = https://abc123xyz.execute-api.us-east-1.amazonaws.com/productos-api
+VITE_USUARIOS_API_URL  = https://abc123xyz.execute-api.us-east-1.amazonaws.com/usuarios-api
+```
+Vite solo incrusta variables `VITE_*` **en tiempo de build** — si las cambias después, tienes que redeployar (Amplify Console → tu app → **Redeploy this version**, o hacer un nuevo commit/push).
+
+## D.5 Deploy
+
+**Save and deploy**. Amplify clona el repo, instala dependencias, corre `npm run build` y publica el contenido de `dist/`. Tarda 2-5 minutos la primera vez. Al terminar te da una URL del tipo:
+```
+https://main.d1a2b3c4d5e6f7.amplifyapp.com
+```
+
+## D.6 Verificar
+
+Abre esa URL en el navegador y confirma que carga productos y usuarios (Network tab → peticiones a `execute-api.amazonaws.com`, código 200, `Type: json`). Cada `git push` a `main` dispara un redeploy automático de Amplify — no hace falta repetir estos pasos, solo D.4 si cambian las URLs de API Gateway.
 
 ---
 
@@ -381,17 +498,14 @@ Usa `t3.medium` o superior (mínimo 4 GB RAM) para la **MV Backend**. Con menos 
 
 ---
 
-## ¿Por qué el frontend no va en AWS Amplify todavía?
+## Troubleshooting de API Gateway / Amplify
 
-Amplify sirve la web siempre por **HTTPS**. El backend en la MV Backend responde por **HTTP plano** (sin certificado). Si el frontend estuviera en Amplify (https) y llamara a `http://<ip-mv-backend>:8001`, el navegador bloquearía la petición por **mixed content** — el mismo "Failed to fetch" pero por otra causa, y esta vez no hay forma de arreglarlo desde el frontend.
+### El frontend en Amplify no carga datos (pero local sí)
 
-Por eso el enunciado pide montar **AWS API Gateway** (que expone las APIs por https) delante del backend antes de desplegar en Amplify. Ese es el orden para la entrega final (Hito 2):
-
-1. Poner API Gateway (https) delante de los microservicios repartidos en las 2 MV de producción + balanceador.
-2. Actualizar `frontend/.env` para usar las URLs de API Gateway en vez de `ip:puerto` directo.
-3. Recién ahí desplegar el frontend en AWS Amplify.
-
-Para este avance, correr el frontend en `localhost` (http) contra la MV Backend (http) es válido y evita el problema de mixed content.
+1. **Revisa las variables de entorno en Amplify** (App settings → Environment variables) — deben ser las URLs de API Gateway (`.../productos-api`, `.../usuarios-api`), no `ip:puerto` directo.
+2. Si acabas de cambiarlas, **redeploya** — Vite las incrusta en build time, no en runtime.
+3. **DevTools → Network** en el sitio de Amplify: si las peticiones a `execute-api.amazonaws.com` dan error 5xx, el problema está entre API Gateway y la MV Backend (ver punto 4). Si ni siquiera aparecen, revisa que el `.env`/variables tengan la URL bien escrita.
+4. `curl` las URLs de API Gateway (paso C.6) directo — si fallan ahí también, casi siempre es la **Integration URL apuntando a una IP pública vieja** de la MV Backend (se detiene/enciende sin Elastic IP). Actualízala en API Gateway → Routes → Integration details.
 
 ---
 
@@ -400,8 +514,9 @@ Para este avance, correr el frontend en `localhost` (http) contra la MV Backend 
 - [ ] Implementar `ms-pedidos` (Node.js + MongoDB), `ms-checkout` (sin BD) y `ms-analitica` (Athena)
 - [ ] Repartir los 5 microservicios en 2 MV de producción + balanceador de carga privado
 - [ ] Mover las bases de datos a una 3ra MV privada (no pública)
-- [ ] AWS API Gateway (https) público delante del balanceador
-- [ ] Desplegar el frontend en AWS Amplify (después del API Gateway)
+- [ ] Apuntar el API Gateway al balanceador de carga (hoy apunta directo a la MV Backend, válido para el avance)
+- [ ] AWS API Gateway (https) público delante del backend — guía lista en Parte C, pendiente ejecutar
+- [ ] Desplegar el frontend en AWS Amplify — guía lista en Parte D, pendiente ejecutar
 - [x] MV "ingesta" dedicada para los contenedores de ingesta (`ingesta-productos`, `ingesta-usuarios`) — falta `ingesta-pedidos` cuando exista `ms-pedidos`
 - [ ] AWS Glue (catálogo de datos) + diagrama E/R del catálogo
 - [ ] Mínimo 4 consultas SQL + 2 vistas en Athena
