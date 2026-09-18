@@ -4,6 +4,7 @@ import { Package, Search, X } from "lucide-react";
 const TABS = [
   { id: "productos", label: "Productos" },
   { id: "usuarios", label: "Usuarios" },
+  { id: "pedidos", label: "Pedidos" },
 ];
 
 export default function TopBar({ activeTab, onTabChange, searchQuery, onSearchChange, searchPlaceholder }) {

@@ -1,12 +1,25 @@
 const PRODUCTOS_API_URL = import.meta.env.VITE_PRODUCTOS_API_URL || "http://localhost:8001";
 const USUARIOS_API_URL = import.meta.env.VITE_USUARIOS_API_URL || "http://localhost:8002";
+const PEDIDOS_API_URL = import.meta.env.VITE_PEDIDOS_API_URL || "http://localhost:8003";
+const CHECKOUT_API_URL = import.meta.env.VITE_CHECKOUT_API_URL || "http://localhost:8004";
 
 async function request(url, options) {
   const res = await fetch(url, options);
   if (!res.ok) {
-    throw new Error(`Error ${res.status} en ${url}`);
+    const body = await res.json().catch(() => null);
+    const detail = body?.detail || body?.error;
+    throw new Error(detail || `Error ${res.status} en ${url}`);
   }
+  if (res.status === 204) return null;
   return res.json();
+}
+
+function postJSON(url, payload) {
+  return request(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
 }
 
 export const productosApi = {
@@ -17,12 +30,7 @@ export const productosApi = {
     return request(`${PRODUCTOS_API_URL}/productos?${params.toString()}`);
   },
   listarCategorias: () => request(`${PRODUCTOS_API_URL}/categorias`),
-  crear: (producto) =>
-    request(`${PRODUCTOS_API_URL}/productos`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(producto),
-    }),
+  crear: (producto) => postJSON(`${PRODUCTOS_API_URL}/productos`, producto),
 };
 
 export const usuariosApi = {
@@ -31,10 +39,15 @@ export const usuariosApi = {
     if (q) params.set("q", q);
     return request(`${USUARIOS_API_URL}/usuarios?${params.toString()}`);
   },
-  crear: (usuario) =>
-    request(`${USUARIOS_API_URL}/usuarios`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(usuario),
-    }),
+  crear: (usuario) => postJSON(`${USUARIOS_API_URL}/usuarios`, usuario),
+};
+
+export const pedidosApi = {
+  porUsuario: (idUsuario) => request(`${PEDIDOS_API_URL}/usuarios/${idUsuario}/pedidos`),
+  porId: (id) => request(`${PEDIDOS_API_URL}/pedidos/${id}`),
+};
+
+export const checkoutApi = {
+  resumen: (payload) => postJSON(`${CHECKOUT_API_URL}/checkout/resumen`, payload),
+  confirmar: (payload) => postJSON(`${CHECKOUT_API_URL}/checkout/confirmar`, payload),
 };

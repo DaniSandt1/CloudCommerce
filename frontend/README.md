@@ -1,6 +1,6 @@
 # Frontend — Web E-commerce
 
-Página web (React + Vite + Tailwind CSS) que consume los microservicios del backend. **Implementado para la primera entrega:** vistas de Productos (ms-productos) y Usuarios (ms-usuarios).
+Página web (React + Vite + Tailwind CSS) que consume los microservicios del backend: Productos (`ms-productos`), Usuarios (`ms-usuarios`) y Pedidos (`ms-pedidos`, con el flujo de compra pasando por `ms-checkout`).
 
 ## Diseño
 
@@ -12,10 +12,9 @@ Paleta usada (clases de Tailwind, sin config custom):
 - **Placeholders de imagen:** rotación de 8 gradientes (`indigo`, `emerald`, `amber`, `rose`, `sky`, `violet`, `teal`, `orange`) para que la grilla tenga variedad visual sin fotos reales
 
 Features:
-- Buscador (filtra productos por nombre / usuarios por nombre o email, client-side sobre lo ya cargado)
-- Filtro por categoría (chips) en Productos
-- Modal de detalle de producto
-- Alta de usuario en un panel colapsable ("+ Nuevo usuario")
+- **Productos:** paginado y búsqueda server-side por nombre, filtro por categoría (chips), modal de detalle, alta de producto ("+ Nuevo producto").
+- **Usuarios:** paginado y búsqueda server-side por nombre/email, alta de usuario ("+ Nuevo usuario").
+- **Pedidos:** busca los pedidos de un usuario por su ID (usa el mismo buscador de la barra superior), detalle de cada pedido en modal, y un flujo de **"Nuevo pedido"** que arma un carrito simple (ID de producto + cantidad) y lo procesa vía `ms-checkout` — primero `POST /checkout/resumen` para previsualizar precios/stock, luego `POST /checkout/confirmar` para crear el pedido de verdad (que a su vez lo persiste en `ms-pedidos`).
 
 ## Cómo correr localmente
 
@@ -26,11 +25,17 @@ cp .env.example .env   # ajustar URLs si es necesario
 npm run dev
 ```
 
-Requiere que `ms-productos` (puerto 8001) y `ms-usuarios` (puerto 8002) estén corriendo — ver [backend/docker-compose](../backend/docker-compose/).
+Requiere `ms-productos` (8001), `ms-usuarios` (8002), `ms-pedidos` (8003) y `ms-checkout` (8004) corriendo — ver [backend/docker-compose](../backend/docker-compose/).
+
+## Métodos REST invocados por microservicio
+
+- `ms-productos`: `GET /productos`, `GET /categorias`, `POST /productos`
+- `ms-usuarios`: `GET /usuarios`, `POST /usuarios`
+- `ms-pedidos`: `GET /usuarios/{id}/pedidos`, `GET /pedidos/{id}`
+- `ms-checkout`: `POST /checkout/resumen`, `POST /checkout/confirmar`
 
 ## Pendiente (para la entrega final)
 
-- [ ] Vistas para ms-pedidos, ms-checkout y ms-analitica
-- [ ] Al menos 2 métodos REST invocados por cada uno de los 5 microservicios
-- [ ] Despliegue en AWS Amplify (ver issue [#1](https://github.com/DaniSandt1/CloudCommerce/issues/1) — requiere API Gateway primero)
+- [ ] Vista para ms-analitica
+- [ ] Despliegue en AWS Amplify (ver issue [#1](https://github.com/DaniSandt1/CloudCommerce/issues/1) — requiere actualizar el API Gateway con las rutas de pedidos/checkout)
 - [ ] Repositorio público en GitHub (enlace aquí)
