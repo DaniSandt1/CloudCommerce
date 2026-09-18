@@ -211,7 +211,7 @@ docker compose run --rm ms-pedidos node scripts/seedPedidos.js
 La API cuenta con documentación interactiva mediante Swagger.
 
 ```text
-http://localhost:8003/api-docs
+http://localhost:8003/docs
 ```
 
 Desde Swagger se pueden consultar y probar los endpoints de `ms-pedidos`.

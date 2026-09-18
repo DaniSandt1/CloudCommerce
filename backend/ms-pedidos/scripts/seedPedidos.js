@@ -20,12 +20,12 @@ const conectarDB = async () => {
 const obtenerProductos = async () => {
     const response = await axios.get(`${PRODUCTOS_URL}/productos`, {
         params: {
-            skip: 0,
-            limit: 20000
+            page: 0,
+            size: 20000
         }
     });
 
-    return response.data;
+    return response.data.content;
 };
 
 const numeroAleatorio = (min, max) => {
