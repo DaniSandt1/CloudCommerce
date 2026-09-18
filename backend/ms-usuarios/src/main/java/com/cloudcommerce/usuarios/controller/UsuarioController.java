@@ -70,6 +70,25 @@ public class UsuarioController {
         return usuarioRepository.save(usuario);
     }
 
+    @PutMapping("/usuarios/{id}")
+    public Usuario actualizarUsuario(@PathVariable Long id, @Valid @RequestBody Usuario cambios) {
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+        usuario.setNombre(cambios.getNombre());
+        usuario.setEmail(cambios.getEmail());
+        usuario.setPasswordHash(cambios.getPasswordHash());
+        return usuarioRepository.save(usuario);
+    }
+
+    @DeleteMapping("/usuarios/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void eliminarUsuario(@PathVariable Long id) {
+        if (!usuarioRepository.existsById(id)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado");
+        }
+        usuarioRepository.deleteById(id);
+    }
+
     @GetMapping("/usuarios/{id}/direcciones")
     public List<Direccion> listarDirecciones(@PathVariable Long id) {
         return direccionRepository.findByUsuarioId(id);

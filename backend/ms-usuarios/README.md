@@ -7,7 +7,8 @@ API REST de registro y datos de clientes del e-commerce. **Implementado para la 
 - **Tablas (2 relacionadas):** `usuarios`, `direcciones`
 - **Endpoints:**
   - `GET /health`
-  - `GET /usuarios` (paginado), `GET /usuarios/{id}`, `POST /usuarios`
+  - `GET /usuarios` (paginado `page`/`size`, búsqueda `q` por nombre o email), `GET /usuarios/{id}`
+  - `POST /usuarios`, `PUT /usuarios/{id}`, `DELETE /usuarios/{id}` (CRUD completo)
   - `GET /usuarios/{id}/direcciones`, `POST /usuarios/{id}/direcciones`
 - **Docs interactivos (Swagger/OpenAPI):** `/swagger-ui.html`
 
