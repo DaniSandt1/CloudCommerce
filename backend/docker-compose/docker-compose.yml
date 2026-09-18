@@ -61,6 +61,22 @@ services:
       postgres-usuarios:
         condition: service_healthy
 
+  ms-checkout:
+    build: ../ms-checkout
+    restart: unless-stopped
+    environment:
+      PRODUCTOS_URL: http://ms-productos:8000
+      USUARIOS_URL: http://ms-usuarios:8000
+      PEDIDOS_URL: http://ms-pedidos:8000
+      REQUEST_TIMEOUT_SECONDS: "5"
+    ports:
+      - "8004:8000"
+    depends_on:
+      - ms-productos
+      - ms-usuarios
+      - ms-pedidos
+
 volumes:
   mysql_productos_data:
   postgres_usuarios_data:
+  mongodb_pedidos_data:
