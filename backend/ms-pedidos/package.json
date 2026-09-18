@@ -1,0 +1,22 @@
+{
+  "name": "ms-pedidos",
+  "version": "1.0.0",
+  "description": "API REST de órdenes de compra del e-commerce.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/app.js",
+    "dev": "node --watch src/app.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "axios": "^1.20.0",
+    "cors": "^2.8.5",
+    "express": "^5.2.1",
+    "mongoose": "^9.10.1",
+    "swagger-jsdoc": "^6.3.0",
+    "swagger-ui-express": "^5.0.1"
+  }
+}

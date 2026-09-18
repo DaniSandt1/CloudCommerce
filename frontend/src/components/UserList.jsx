@@ -22,6 +22,7 @@ export default function UserList({ usuarios }) {
           <div className="min-w-0">
             <p className="text-sm font-medium text-zinc-900 truncate">{u.nombre}</p>
             <p className="text-xs text-zinc-500 truncate">{u.email}</p>
+            <p className="text-[10px] text-zinc-400">ID: #{u.id}</p>
           </div>
         </div>
       ))}

@@ -406,6 +406,258 @@ Abre esa URL en el navegador y confirma que carga productos y usuarios (Network 
 
 ---
 
+# Parte E — Arquitectura de Producción Final (Hito 2)
+
+Esto reemplaza la MV Backend única de las Partes A-C por lo que pide el enunciado: **2 Máquinas Virtuales de Producción** (los 4 microservicios repartidos) + **balanceador de carga privado** + **3ra Máquina Virtual solo para las bases de datos, privada** (no pública). API Gateway pasa a apuntar al balanceador, no directo a una EC2.
+
+```
+                          Internet
+                             │
+                    API Gateway (https, público)
+                             │
+                    VPC Link (privado)
+                             │
+              Balanceador de carga interno (ALB, sin IP pública)
+                 ┌───────────┴────────────┐
+        MV Producción 1              MV Producción 2
+        (cloudcommerce-backend)      (cloudcommerce-prod2)
+        ├─ ms-productos :8001        ├─ ms-pedidos  :8003
+        └─ ms-usuarios  :8002        └─ ms-checkout :8004
+                 │                            │
+                 └──────────┬─────────────────┘
+                             │ (privado)
+                    MV BD (cloudcommerce-bd, privada)
+                    ├─ mysql-productos :3306
+                    ├─ postgres-usuarios :5432
+                    └─ mongo-pedidos :27017
+```
+
+**Antes de empezar:** anota la IP privada de `cloudcommerce-backend` (ya la tienes de la Parte A.6) y la de `cloudcommerce-ingesta` — las vas a necesitar para varios pasos.
+
+## E.1 Lanzar la MV BD (3ra instancia, privada)
+
+**EC2 → Launch instance**:
+
+| Campo | Valor |
+|---|---|
+| **Name** | `cloudcommerce-bd` |
+| **AMI** | Ubuntu Server 26.04 LTS |
+| **Instance type** | `t3.medium` (corre las 3 bases de datos a la vez) |
+| **Key pair** | La misma que usas para las demás |
+| **Network settings → VPC/subred** | La **misma VPC y subred** que `cloudcommerce-backend` |
+| **Advanced details → IAM instance profile** | Déjalo vacío (no necesita S3) |
+
+### Security Group de `cloudcommerce-bd` (100% privado, sin `0.0.0.0/0`)
+
+| Type | Port | Source | Para qué |
+|---|---|---|---|
+| SSH | 22 | My IP | Para administrarla |
+| Custom TCP | 3306 | IP privada `cloudcommerce-backend`/32 | `ms-productos` (MySQL) |
+| Custom TCP | 5432 | IP privada `cloudcommerce-backend`/32 | `ms-usuarios` (PostgreSQL) |
+| Custom TCP | 27017 | IP privada `cloudcommerce-prod2` (Mongo, la agregas en E.2) | `ms-pedidos` |
+| Custom TCP | 3306, 5432, 27017 | IP privada `cloudcommerce-ingesta`/32 | Para que la ingesta siga leyendo (agrega las 3, una regla por puerto) |
+
+**No le asignes IP pública** al lanzarla (o si Academy te la da igual, no la uses para nada — todo el tráfico real entra por IP privada).
+
+Conéctate por **EC2 Instance Connect** (no necesita IP pública) o por SSH saltando desde `cloudcommerce-backend` (`ssh -J ubuntu@<ip-publica-backend> ubuntu@<ip-privada-bd>`).
+
+## E.2 Lanzar la MV Producción 2 (`ms-pedidos` + `ms-checkout`)
+
+**EC2 → Launch instance**:
+
+| Campo | Valor |
+|---|---|
+| **Name** | `cloudcommerce-prod2` |
+| **AMI** | Ubuntu Server 26.04 LTS |
+| **Instance type** | `t3.small` (2 apps livianas, sin BD local) |
+| **Network settings → VPC/subred** | La misma VPC/subred que las otras 2 |
+| **Storage** | 15-20 GB |
+
+### Security Group de `cloudcommerce-prod2`
+
+| Type | Port | Source | Para qué |
+|---|---|---|---|
+| SSH | 22 | My IP | Administrarla |
+| Custom TCP | 8003 | Security Group del balanceador (lo creas en E.6, vuelve a esta regla después) | `ms-pedidos` |
+| Custom TCP | 8004 | Security Group del balanceador | `ms-checkout` |
+
+⚠️ **No abras 8003/8004 a `0.0.0.0/0`** — solo el balanceador debe poder llegar, por eso el *source* es su Security Group (lo agregas en E.6, esta regla queda pendiente hasta entonces; mientras tanto usa temporalmente tu IP para poder probar por tu cuenta).
+
+Instala Docker/Git igual que en la Parte A.3, clona el repo (A.4), y anota su **IP privada** (A.6) — la necesitas para el Security Group de `cloudcommerce-bd` (E.1) y para que `cloudcommerce-backend` reciba llamadas de vuelta si alguna vez hiciera falta.
+
+## E.3 Reconfigurar `cloudcommerce-backend` como MV Producción 1 (solo productos + usuarios)
+
+Por SSH en `cloudcommerce-backend`:
+
+```bash
+cd ~/CloudCommerce/backend/docker-compose
+docker compose down          # baja TODO, incluidas las BD de esta VM
+git pull                     # trae el docker-compose.yml con ms-pedidos/ms-checkout (rama mergeada)
+```
+
+Edita `docker-compose.yml` en esta EC2 para que **solo** levante `ms-productos` y `ms-usuarios`, apuntando a la nueva `cloudcommerce-bd` en vez de a los contenedores locales de MySQL/Postgres:
+
+```bash
+nano docker-compose.yml
+```
+- Borra los servicios `mysql-productos`, `postgres-usuarios`, `mongodb-pedidos`, `ms-pedidos`, `ms-checkout` (y sus volúmenes) de este archivo — esos ya no viven aquí.
+- Cambia las variables de `ms-productos`/`ms-usuarios` para que apunten a la IP privada de `cloudcommerce-bd`:
+```yaml
+  ms-productos:
+    build: ../ms-productos
+    environment:
+      DATABASE_URL: mysql+pymysql://productos_user:productos_pass@<IP-PRIVADA-cloudcommerce-bd>:3306/productos_db
+    ports:
+      - "8001:8000"
+
+  ms-usuarios:
+    build: ../ms-usuarios
+    environment:
+      DATABASE_URL: jdbc:postgresql://<IP-PRIVADA-cloudcommerce-bd>:5432/usuarios_db
+      DATABASE_USER: usuarios_user
+      DATABASE_PASSWORD: usuarios_pass
+    ports:
+      - "8002:8000"
+```
+
+```bash
+docker compose up -d --build
+```
+
+## E.4 Levantar las bases de datos en la MV BD
+
+En `cloudcommerce-bd` (por SSH), crea un `docker-compose.yml` solo con las 3 bases de datos (copia los bloques `mysql-productos`, `postgres-usuarios` y `mongodb-pedidos` del `docker-compose.yml` original del repo, sin los servicios de aplicación):
+
+```bash
+mkdir -p ~/db && cd ~/db
+nano docker-compose.yml
+```
+Pega las 3 definiciones de servicio (imagen, environment, volumes, healthcheck) tal cual están en `backend/docker-compose/docker-compose.yml`, sin los servicios `ms-*`.
+
+```bash
+docker compose up -d
+```
+
+**Datos:** lo más simple con el tiempo que tienes es re-sembrar aquí directo (mismos scripts, misma cantidad — los IDs vuelven a salir 1..20000, así que las referencias `id_producto`/`id_usuario` de pedidos ya creados siguen siendo válidas):
+```bash
+# desde cloudcommerce-backend, apuntando temporalmente su DATABASE_URL a cloudcommerce-bd (ya lo hiciste en E.3)
+docker compose exec ms-productos python -m app.seed
+# ms-usuarios se auto-siembra al arrancar (DataSeeder)
+
+# desde cloudcommerce-prod2, una vez levantado en E.5
+docker compose exec ms-pedidos node scripts/seedPedidos.js
+```
+
+## E.5 Levantar `ms-pedidos` + `ms-checkout` en la MV Producción 2
+
+Por SSH en `cloudcommerce-prod2`, crea su propio `docker-compose.yml` (solo estos 2 servicios, sin bases de datos):
+
+```yaml
+services:
+  ms-pedidos:
+    build: ../ms-pedidos
+    restart: unless-stopped
+    environment:
+      MONGODB_URL: mongodb://<IP-PRIVADA-cloudcommerce-bd>:27017/pedidos_db
+      PRODUCTOS_URL: http://<IP-PRIVADA-cloudcommerce-backend>:8001
+      USUARIOS_URL: http://<IP-PRIVADA-cloudcommerce-backend>:8002
+    ports:
+      - "8003:8000"
+
+  ms-checkout:
+    build: ../ms-checkout
+    restart: unless-stopped
+    environment:
+      PRODUCTOS_URL: http://<IP-PRIVADA-cloudcommerce-backend>:8001
+      USUARIOS_URL: http://<IP-PRIVADA-cloudcommerce-backend>:8002
+      PEDIDOS_URL: http://localhost:8003
+    ports:
+      - "8004:8000"
+```
+
+⚠️ Nota el cambio: como `ms-productos`/`ms-usuarios` ya no están en la misma red de Docker Compose que `ms-pedidos`/`ms-checkout` (están en otra VM), las URLs pasan de `http://ms-productos:8000` (nombre del servicio) a `http://<IP-privada>:8001` (host:puerto real). También hace falta abrir en el Security Group de `cloudcommerce-backend` los puertos 8001/8002 con *source* = IP privada de `cloudcommerce-prod2`/32, además de la regla que ya tiene para el balanceador.
+
+```bash
+docker compose up -d --build
+docker compose exec ms-pedidos node scripts/seedPedidos.js
+```
+
+## E.6 Crear el Balanceador de Carga interno (privado)
+
+**Consola AWS → EC2 → Load Balancers → Create load balancer → Application Load Balancer**:
+
+- **Name:** `cloudcommerce-lb`
+- **Scheme:** **Internal** (esto es lo que lo hace privado — no le asigna IP pública)
+- **VPC / subredes:** las mismas 3 subredes donde están tus EC2 (necesitas al menos 2 subredes de la misma VPC por requisito de ALB)
+- **Security group:** crea uno nuevo, `sg-balanceador`, sin reglas de entrada desde `0.0.0.0/0` — luego permite que **API Gateway le llegue vía VPC Link** (E.7 se encarga del lado de red; el SG del balanceador debe permitir entrada en 8001-8004 desde el SG que use el VPC Link, o más simple: desde el CIDR de la VPC).
+
+**Listeners y Target Groups** (repite 4 veces, uno por microservicio):
+
+| Listener port | Target group | Target | Health check path |
+|---|---|---|---|
+| 8001 | `tg-productos` | `cloudcommerce-backend` : 8001 | `/health` |
+| 8002 | `tg-usuarios` | `cloudcommerce-backend` : 8002 | `/health` |
+| 8003 | `tg-pedidos` | `cloudcommerce-prod2` : 8003 | `/health` |
+| 8004 | `tg-checkout` | `cloudcommerce-prod2` : 8004 | `/health` |
+
+Para cada uno: **Target groups → Create target group** (tipo *Instances*, protocolo HTTP, el puerto correspondiente, health check `/health`) → registra la instancia correspondiente en ese puerto → luego en el ALB agrega un **Listener** en ese mismo puerto que reenvíe a ese target group.
+
+Verifica que los 4 target groups queden **Healthy** antes de seguir (Target Groups → cada uno → pestaña Targets).
+
+Ahora sí vuelve a los Security Groups de `cloudcommerce-backend` y `cloudcommerce-prod2` (E.2/E.3) y cambia el *source* de las reglas 8001-8004 a `sg-balanceador` (el Security Group del ALB), quitando cualquier acceso directo desde tu IP que hayas dejado para probar.
+
+## E.7 Crear un VPC Link (para que API Gateway llegue al balanceador privado)
+
+API Gateway vive fuera de tu VPC — necesita un **VPC Link** para alcanzar un ALB interno.
+
+**API Gateway → VPC Links → Create**:
+- **Name:** `cloudcommerce-vpclink`
+- **VPC Link for:** HTTP API
+- **Subnets:** las mismas donde vive el balanceador
+- **Security group:** el mismo `sg-balanceador` (o uno que tenga acceso a él)
+
+Tarda unos minutos en pasar a estado **Available**.
+
+## E.8 Actualizar las rutas de API Gateway
+
+En tu API (`cloudcommerce-api`, la misma de la Parte C):
+
+**Para las rutas existentes** (`/productos-api/{proxy+}`, `/usuarios-api/{proxy+}`): entra a cada una → **Integration details → Edit** → cambia:
+- **Integration type:** `Private`
+- **Integration target:** el ARN del listener/target group correspondiente del ALB, o el DNS del ALB según el asistente
+- **VPC Link:** `cloudcommerce-vpclink`
+
+**Rutas nuevas** (una por microservicio nuevo):
+- `ANY /pedidos-api/{proxy+}` → integración privada vía `cloudcommerce-vpclink` → apunta al listener 8003 del balanceador
+- `ANY /checkout-api/{proxy+}` → integración privada vía `cloudcommerce-vpclink` → apunta al listener 8004 del balanceador
+
+Habilita CORS en estas 2 rutas nuevas igual que en C.2.
+
+## E.9 Actualizar Amplify
+
+**App settings → Environment variables**, agrega:
+```
+VITE_PEDIDOS_API_URL  = https://<api-id>.execute-api.us-east-1.amazonaws.com/pedidos-api
+VITE_CHECKOUT_API_URL = https://<api-id>.execute-api.us-east-1.amazonaws.com/checkout-api
+```
+**Redeploy this version** (o haz un commit/push cualquiera a `main`).
+
+## E.10 Actualizar la ingesta (la BD se mudó de VM)
+
+En `cloudcommerce-ingesta`, actualiza `DB_HOST` en `.env` de `ingesta-productos` e `ingesta-usuarios` a la **IP privada de `cloudcommerce-bd`** (ya no la de `cloudcommerce-backend`), y vuelve a correrlos. `ingesta-pedidos` (si aún no existe, es trabajo pendiente aparte) también apuntaría ahí, a Mongo.
+
+## E.11 Verificar todo end-to-end
+
+```bash
+curl https://<api-id>.execute-api.us-east-1.amazonaws.com/productos-api/health
+curl https://<api-id>.execute-api.us-east-1.amazonaws.com/usuarios-api/health
+curl https://<api-id>.execute-api.us-east-1.amazonaws.com/pedidos-api/health
+curl https://<api-id>.execute-api.us-east-1.amazonaws.com/checkout-api/health
+```
+Los 4 deben responder 200. Luego abre tu URL de Amplify y prueba las 3 pestañas (Productos, Usuarios, Pedidos) igual que en local.
+
+---
+
 ## Reinicio rápido (ya con todo instalado)
 
 Si ya hiciste los pasos de las Partes A y B una vez, retomar el trabajo en una sesión nueva es corto. **Prende primero la MV Backend**, luego la MV Ingesta (necesitas su IP para el frontend y, si cambió, para reconfigurar `.env` de la ingesta).
@@ -521,15 +773,18 @@ Pasa cuando `AMPLIFY_MONOREPO_APP_ROOT` está seteado (modo Monorepo activado) p
 
 ## Qué falta para la entrega final (Hito 2)
 
-- [ ] Implementar `ms-pedidos` (Node.js + MongoDB), `ms-checkout` (sin BD) y `ms-analitica` (Athena)
-- [ ] Repartir los 5 microservicios en 2 MV de producción + balanceador de carga privado
-- [ ] Mover las bases de datos a una 3ra MV privada (no pública)
-- [ ] Apuntar el API Gateway al balanceador de carga (hoy apunta directo a la MV Backend, válido para el avance)
-- [ ] AWS API Gateway (https) público delante del backend — guía lista en Parte C, pendiente ejecutar
-- [ ] Desplegar el frontend en AWS Amplify — guía lista en Parte D, pendiente ejecutar
-- [x] MV "ingesta" dedicada para los contenedores de ingesta (`ingesta-productos`, `ingesta-usuarios`) — falta `ingesta-pedidos` cuando exista `ms-pedidos`
+- [x] Implementar `ms-pedidos` (Node.js + MongoDB) y `ms-checkout` (sin BD) — PR [#5](https://github.com/DaniSandt1/CloudCommerce/pull/5)
+- [ ] Implementar `ms-analitica` Fase A (Athena mockeado) — issue [#4](https://github.com/DaniSandt1/CloudCommerce/issues/4)
+- [x] AWS API Gateway (https) público delante del backend — hecho para productos/usuarios (Parte C)
+- [x] Desplegar el frontend en AWS Amplify — hecho (Parte D)
+- [ ] Repartir los 4 microservicios en 2 MV de producción + balanceador de carga privado — guía lista en **Parte E**, pendiente ejecutar
+- [ ] Mover las bases de datos a una 3ra MV privada (no pública) — guía lista en **Parte E**, pendiente ejecutar
+- [ ] Apuntar el API Gateway al balanceador de carga vía VPC Link (hoy apunta directo a la MV Backend) — guía lista en **Parte E**, pendiente ejecutar
+- [ ] Agregar rutas de API Gateway + variables de Amplify para `ms-pedidos`/`ms-checkout` — guía lista en Parte E.8/E.9
+- [x] MV "ingesta" dedicada para los contenedores de ingesta (`ingesta-productos`, `ingesta-usuarios`)
+- [ ] `ingesta-pedidos` (ahora que `ms-pedidos` ya existe)
 - [ ] AWS Glue (catálogo de datos) + diagrama E/R del catálogo
 - [ ] Mínimo 4 consultas SQL + 2 vistas en Athena
 - [ ] Diagrama de Arquitectura de Solución en draw.io
-- [ ] Documentación Swagger-UI de las 5 APIs
+- [x] Documentación Swagger-UI — 4/5 APIs (`ms-productos` `/docs`, `ms-usuarios` `/swagger-ui.html`, `ms-pedidos` `/docs`, `ms-checkout` `/docs`); falta `ms-analitica`
 - [ ] Informe y presentación finales
