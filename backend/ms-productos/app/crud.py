@@ -17,13 +17,30 @@ def create_categoria(db: Session, categoria: schemas.CategoriaCreate):
     return db_categoria
 
 
-def get_productos(
-    db: Session, skip: int = 0, limit: int = 50, categoria_id: Optional[int] = None
-):
+def _filtrar_productos(db: Session, categoria_id: Optional[int], q: Optional[str]):
     query = db.query(models.Producto)
     if categoria_id is not None:
         query = query.filter(models.Producto.categoria_id == categoria_id)
-    return query.offset(skip).limit(limit).all()
+    if q:
+        query = query.filter(models.Producto.nombre.ilike(f"%{q}%"))
+    return query
+
+
+def get_productos(
+    db: Session,
+    skip: int = 0,
+    limit: int = 50,
+    categoria_id: Optional[int] = None,
+    q: Optional[str] = None,
+):
+    query = _filtrar_productos(db, categoria_id, q)
+    return query.order_by(models.Producto.id.desc()).offset(skip).limit(limit).all()
+
+
+def count_productos_filtrados(
+    db: Session, categoria_id: Optional[int] = None, q: Optional[str] = None
+) -> int:
+    return _filtrar_productos(db, categoria_id, q).count()
 
 
 def get_producto(db: Session, producto_id: int):

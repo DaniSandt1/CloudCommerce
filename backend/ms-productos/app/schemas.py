@@ -33,3 +33,11 @@ class Producto(ProductoBase):
     model_config = ConfigDict(from_attributes=True)
     id: int
     creado_en: Optional[datetime] = None
+
+
+class ProductoPage(BaseModel):
+    content: list[Producto]
+    total_elements: int
+    total_pages: int
+    page: int
+    size: int

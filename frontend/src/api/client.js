@@ -10,9 +10,11 @@ async function request(url, options) {
 }
 
 export const productosApi = {
-  listar: (categoriaId) => {
-    const query = categoriaId ? `?categoria_id=${categoriaId}` : "";
-    return request(`${PRODUCTOS_API_URL}/productos${query}`);
+  listar: (page = 0, size = 30, q = "", categoriaId) => {
+    const params = new URLSearchParams({ page, size });
+    if (q) params.set("q", q);
+    if (categoriaId) params.set("categoria_id", categoriaId);
+    return request(`${PRODUCTOS_API_URL}/productos?${params.toString()}`);
   },
   listarCategorias: () => request(`${PRODUCTOS_API_URL}/categorias`),
   crear: (producto) =>

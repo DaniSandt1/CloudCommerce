@@ -43,14 +43,25 @@ def crear_categoria(categoria: schemas.CategoriaCreate, db: Session = Depends(ge
     return crud.create_categoria(db, categoria)
 
 
-@app.get("/productos", response_model=List[schemas.Producto], tags=["productos"])
+@app.get("/productos", response_model=schemas.ProductoPage, tags=["productos"])
 def listar_productos(
-    skip: int = 0,
-    limit: int = 50,
+    page: int = 0,
+    size: int = 50,
     categoria_id: Optional[int] = None,
+    q: Optional[str] = None,
     db: Session = Depends(get_db),
 ):
-    return crud.get_productos(db, skip=skip, limit=limit, categoria_id=categoria_id)
+    skip = page * size
+    productos = crud.get_productos(db, skip=skip, limit=size, categoria_id=categoria_id, q=q)
+    total_elements = crud.count_productos_filtrados(db, categoria_id=categoria_id, q=q)
+    total_pages = (total_elements + size - 1) // size if size else 0
+    return schemas.ProductoPage(
+        content=productos,
+        total_elements=total_elements,
+        total_pages=total_pages,
+        page=page,
+        size=size,
+    )
 
 
 @app.get("/productos/{producto_id}", response_model=schemas.Producto, tags=["productos"])
