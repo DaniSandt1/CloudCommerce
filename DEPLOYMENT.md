@@ -408,6 +408,8 @@ Abre esa URL en el navegador y confirma que carga productos y usuarios (Network 
 
 # Parte E — Arquitectura de Producción Final (Hito 2)
 
+> ✅ **Ejecutada y verificada en producción.** Esta sección queda como referencia/repetible (por ejemplo, si el AWS Academy Lab se reinicia y hay que rearmar todo desde cero) — no es solo un plan.
+
 Esto reemplaza la MV Backend única de las Partes A-C por lo que pide el enunciado: **2 Máquinas Virtuales de Producción** (los 4 microservicios repartidos) + **balanceador de carga privado** + **3ra Máquina Virtual solo para las bases de datos, privada** (no pública). API Gateway pasa a apuntar al balanceador, no directo a una EC2.
 
 ```
@@ -853,14 +855,13 @@ Pasa cuando `AMPLIFY_MONOREPO_APP_ROOT` está seteado (modo Monorepo activado) p
 
 - [x] Implementar `ms-pedidos` (Node.js + MongoDB) y `ms-checkout` (sin BD) — PR [#5](https://github.com/DaniSandt1/CloudCommerce/pull/5)
 - [ ] Implementar `ms-analitica` Fase A (Athena mockeado) — issue [#4](https://github.com/DaniSandt1/CloudCommerce/issues/4)
-- [x] AWS API Gateway (https) público delante del backend — hecho para productos/usuarios (Parte C)
-- [x] Desplegar el frontend en AWS Amplify — hecho (Parte D)
-- [ ] Repartir los 4 microservicios en 2 MV de producción + balanceador de carga privado — guía lista en **Parte E**, pendiente ejecutar
-- [ ] Mover las bases de datos a una 3ra MV privada (no pública) — guía lista en **Parte E**, pendiente ejecutar
-- [ ] Apuntar el API Gateway al balanceador de carga vía VPC Link (hoy apunta directo a la MV Backend) — guía lista en **Parte E**, pendiente ejecutar
-- [ ] Agregar rutas de API Gateway + variables de Amplify para `ms-pedidos`/`ms-checkout` — guía lista en Parte E.8/E.9
-- [x] MV "ingesta" dedicada para los contenedores de ingesta (`ingesta-productos`, `ingesta-usuarios`)
-- [ ] `ingesta-pedidos` (ahora que `ms-pedidos` ya existe)
+- [x] AWS API Gateway (https) público delante del backend — las 4 rutas (productos/usuarios/pedidos/checkout)
+- [x] Desplegar el frontend en AWS Amplify — con las pestañas Productos, Usuarios y Pedidos
+- [x] Repartir los 4 microservicios en 2 MV de producción + balanceador de carga privado — **Parte E ejecutada**: `cloudcommerce-backend` (productos+usuarios) / `cloudcommerce-prod2` (pedidos+checkout) detrás de `cloudcommerce-lb` (ALB interno)
+- [x] Mover las bases de datos a una 3ra MV privada (no pública) — `cloudcommerce-bd`, sin IP pública en uso, solo accesible por IP privada desde las MV de producción/ingesta
+- [x] Apuntar el API Gateway al balanceador de carga vía VPC Link — las 4 rutas usan integración `Private` a través de `cloudcommerce-vpclink`
+- [x] Rutas de API Gateway + variables de Amplify para `ms-pedidos`/`ms-checkout`
+- [x] MV "ingesta" dedicada para los contenedores de ingesta — los 3 (`ingesta-productos`, `ingesta-usuarios`, `ingesta-pedidos`)
 - [ ] AWS Glue (catálogo de datos) + diagrama E/R del catálogo
 - [ ] Mínimo 4 consultas SQL + 2 vistas en Athena
 - [ ] Diagrama de Arquitectura de Solución en draw.io

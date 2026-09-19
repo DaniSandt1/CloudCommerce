@@ -51,32 +51,36 @@ Data Science: MV Ingesta (3 contenedores docker en Python, pull 100%) → Bucket
 | [ms-productos](backend/ms-productos/) | Python (FastAPI) | MySQL | CRUD de catálogo de productos |
 | [ms-usuarios](backend/ms-usuarios/) | Java (Spring Boot) | PostgreSQL | Registro/login de clientes |
 | [ms-pedidos](backend/ms-pedidos/) | Node.js (Express) | MongoDB | Órdenes de compra |
-| [ms-checkout](backend/ms-checkout/) | (por definir) | Sin BD | Orquesta productos + usuarios + pedidos |
+| [ms-checkout](backend/ms-checkout/) | Python (FastAPI) | Sin BD | Orquesta productos + usuarios + pedidos |
 | [ms-analitica](backend/ms-analitica/) | Python | Athena (sin BD transaccional) | Consultas analíticas sobre datos en S3 |
 
 ## Estado actual
 
-**Avance (Hito 1): COMPLETO ✅** — 2 microservicios funcionando (`ms-productos` y `ms-usuarios`) + frontend que los consuma + MV Ingesta separada con datos subidos a S3, repartido en **2 máquinas virtuales** (MV Backend / MV Ingesta) como pide la rúbrica de avance.
+**Avance (Hito 1): COMPLETO ✅.** **Arquitectura de producción final (Hito 2): DESPLEGADA ✅** — los 4 microservicios con BD/consumo que exige el enunciado están implementados y corriendo en AWS con la arquitectura final: 2 MV de producción + balanceador de carga privado + 3ra MV de bases de datos, todo detrás de API Gateway y con el frontend en Amplify. Solo falta `ms-analitica`.
 
-- ✅ `ms-productos` (Python/FastAPI + MySQL) — desplegado en MV Backend, 20,000 productos cargados
-- ✅ `ms-usuarios` (Java/Spring Boot + PostgreSQL) — desplegado en MV Backend, 20,000 usuarios cargados
-- ✅ `frontend` (React) consumiendo ambos — probado end-to-end contra la MV Backend
-- ✅ `ingesta-productos` e `ingesta-usuarios` (Python → S3) — corren como contenedores en su propia **MV Ingesta**, bucket `cloudcommerce-datalake` creado, ambos CSV subidos correctamente
-- ⏳ `ms-pedidos`, `ms-checkout`, `ms-analitica` — pendientes para la entrega final (Hito 2)
-- ⏳ AWS Amplify, API Gateway, balanceador de carga, 2 MV de producción + 3ra MV de BD — pendientes para la entrega final (Hito 2)
+- ✅ `ms-productos` (Python/FastAPI + MySQL) — 20,000 productos, CRUD completo, paginado/búsqueda
+- ✅ `ms-usuarios` (Java/Spring Boot + PostgreSQL) — 20,000 usuarios, CRUD completo, paginado/búsqueda
+- ✅ `ms-pedidos` (Node.js/Express + MongoDB) — 20,000 pedidos, consume `ms-productos`/`ms-usuarios`
+- ✅ `ms-checkout` (Python/FastAPI, sin BD) — orquesta `ms-productos`+`ms-usuarios`+`ms-pedidos` para el flujo de compra
+- ✅ `frontend` (React) — pestañas Productos, Usuarios y Pedidos, desplegado en AWS Amplify
+- ✅ `ingesta-productos`, `ingesta-usuarios` e `ingesta-pedidos` (Python → S3) — los 3 contenedores requeridos, corriendo en su propia **MV Ingesta**, bucket `cloudcommerce-datalake`
+- ✅ **Arquitectura final**: MV Producción 1 (`ms-productos`+`ms-usuarios`), MV Producción 2 (`ms-pedidos`+`ms-checkout`), 3ra MV privada solo con las bases de datos, balanceador de carga interno (ALB + VPC Link) delante de las 2 MV de producción, API Gateway público apuntando al balanceador — ver [DEPLOYMENT.md, Parte E](DEPLOYMENT.md)
+- ⏳ `ms-analitica` — Fase A (mock de Athena) pendiente, issue [#4](https://github.com/DaniSandt1/CloudCommerce/issues/4)
+- ⏳ AWS Glue (catálogo de datos) + mínimo 4 consultas SQL / 2 vistas en Athena
+- ⏳ Diagrama de Arquitectura de Solución en draw.io, informe y presentación finales
 
 ### Cómo correrlo (AWS + local)
 
-Guía paso a paso completa (lanzar la EC2, Docker, seed de datos, frontend, bucket S3, troubleshooting): **[DEPLOYMENT.md](DEPLOYMENT.md)**.
+Guía paso a paso completa (lanzar las 4 MV, Docker, seed de datos, balanceador, API Gateway, Amplify, troubleshooting): **[DEPLOYMENT.md](DEPLOYMENT.md)**.
 
-Resumen rápido, ya con la EC2 lista y el repo clonado en ella:
+Desarrollo local rápido (los 4 microservicios en un solo `docker-compose`, sin AWS):
 ```bash
 cd backend/docker-compose
 docker compose up -d --build
-docker compose exec ms-productos python -m app.seed   # carga 20,000 productos ficticios
+docker compose exec ms-productos python -m app.seed      # carga 20,000 productos ficticios
+docker compose exec ms-pedidos node scripts/seedPedidos.js  # carga 20,000 pedidos ficticios
 ```
 ```bash
-# en tu laptop, apuntando frontend/.env a la IP pública de la EC2
 cd frontend
 npm install && npm run dev
 ```
