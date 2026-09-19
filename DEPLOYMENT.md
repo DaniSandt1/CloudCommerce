@@ -526,27 +526,105 @@ docker compose up -d --build
 
 ## E.4 Levantar las bases de datos en la MV BD
 
-En `cloudcommerce-bd` (por SSH), crea un `docker-compose.yml` solo con las 3 bases de datos (copia los bloques `mysql-productos`, `postgres-usuarios` y `mongodb-pedidos` del `docker-compose.yml` original del repo, sin los servicios de aplicación):
+En `cloudcommerce-bd` (por SSH), instala Docker/Git (Parte A.3) y clona el repo (A.4) — lo necesitas para construir las imágenes de sembrado de este paso, aunque las apps en sí no vivan en esta VM.
+
+Crea un `docker-compose.yml` solo con las 3 bases de datos:
 
 ```bash
 mkdir -p ~/db && cd ~/db
 nano docker-compose.yml
 ```
-Pega las 3 definiciones de servicio (imagen, environment, volumes, healthcheck) tal cual están en `backend/docker-compose/docker-compose.yml`, sin los servicios `ms-*`.
+```yaml
+services:
+  mysql-productos:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root_pass
+      MYSQL_DATABASE: productos_db
+      MYSQL_USER: productos_user
+      MYSQL_PASSWORD: productos_pass
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_productos_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot_pass"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  postgres-usuarios:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: usuarios_db
+      POSTGRES_USER: usuarios_user
+      POSTGRES_PASSWORD: usuarios_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_usuarios_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U usuarios_user -d usuarios_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  mongodb-pedidos:
+    image: mongo:7
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_pedidos_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  mysql_productos_data:
+  postgres_usuarios_data:
+  mongodb_pedidos_data:
+```
+⚠️ A diferencia del `docker-compose.yml` original del repo (donde `mongodb-pedidos` no publica el puerto al host porque `ms-pedidos` lo alcanza por red interna de Compose, en la misma VM), **aquí sí hace falta `ports: "27017:27017"`** — `ms-pedidos` va a vivir en otra VM (`cloudcommerce-prod2`) y necesita llegar por IP:puerto real, no por nombre de servicio.
 
 ```bash
 docker compose up -d
+docker compose ps   # las 3 deben decir "healthy" y mostrar 0.0.0.0:puerto->puerto en PORTS
 ```
 
-**Datos:** lo más simple con el tiempo que tienes es re-sembrar aquí directo (mismos scripts, misma cantidad — los IDs vuelven a salir 1..20000, así que las referencias `id_producto`/`id_usuario` de pedidos ya creados siguen siendo válidas):
+**Sembrado — sin tocar `cloudcommerce-backend`:** usa contenedores sueltos, construidos desde el código del repo, que se conectan a `localhost` de esta misma VM (los 3 puertos ya están publicados al host por el `docker-compose.yml` de arriba) y se descartan al terminar:
+
 ```bash
-# desde cloudcommerce-backend, apuntando temporalmente su DATABASE_URL a cloudcommerce-bd (ya lo hiciste en E.3)
-docker compose exec ms-productos python -m app.seed
-# ms-usuarios se auto-siembra al arrancar (DataSeeder)
-
-# desde cloudcommerce-prod2, una vez levantado en E.5
-docker compose exec ms-pedidos node scripts/seedPedidos.js
+cd ~/CloudCommerce/backend/ms-productos
+docker build -t seed-productos .
+docker run --rm --network host \
+  -e DATABASE_URL="mysql+pymysql://productos_user:productos_pass@localhost:3306/productos_db" \
+  seed-productos python -m app.seed
 ```
+
+```bash
+cd ~/CloudCommerce/backend/ms-usuarios
+docker build -t seed-usuarios .
+docker run --rm --network host \
+  -e DATABASE_URL="jdbc:postgresql://localhost:5432/usuarios_db" \
+  -e DATABASE_USER=usuarios_user \
+  -e DATABASE_PASSWORD=usuarios_pass \
+  -e SEED_COUNT=20000 \
+  seed-usuarios
+```
+Este segundo levanta el server completo de Spring Boot (no hay forma de correr *solo* el seeder) — el `DataSeeder` corre apenas arranca; espera a ver en el log algo como `Sembrados 20000 usuarios` (o que dejen de aparecer líneas nuevas ~30-60s) y luego `Ctrl+C` para pararlo. No hace falta que quede corriendo aquí — el server real de `ms-usuarios` va a vivir en `cloudcommerce-backend` (Parte E.3).
+
+Mongo no necesita este paso todavía — se siembra directo desde `cloudcommerce-prod2` en E.5, apuntando ya a esta VM.
+
+Verifica antes de seguir:
+```bash
+docker run --rm --network host -e DATABASE_URL="mysql+pymysql://productos_user:productos_pass@localhost:3306/productos_db" seed-productos python -c "from app.database import SessionLocal; from app.models import Producto; print(SessionLocal().query(Producto).count())"
+```
+Debe imprimir `20000` (o más, si ya insertaste antes).
 
 ## E.5 Levantar `ms-pedidos` + `ms-checkout` en la MV Producción 2
 
