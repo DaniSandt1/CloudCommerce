@@ -14,3 +14,8 @@ services:
     build: ./ingesta-usuarios
     env_file:
       - ./ingesta-usuarios/.env
+
+  ingesta-pedidos:
+    build: ./ingesta-pedidos
+    env_file:
+      - ./ingesta-pedidos/.env

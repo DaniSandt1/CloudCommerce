@@ -11,7 +11,7 @@ Los contenedores se orquestan con [docker-compose.yml](docker-compose.yml) (uno 
 |---|---|---|---|---|
 | [ingesta-productos](ingesta-productos/) | MySQL de `ms-productos` (en la MV Backend) | pull 100% | S3 | Implementado |
 | [ingesta-usuarios](ingesta-usuarios/) | PostgreSQL de `ms-usuarios` (en la MV Backend) | pull 100% | S3 | Implementado |
-| [ingesta-pedidos](ingesta-pedidos/) | MongoDB de `ms-pedidos` | pull 100% | S3 | Pendiente (depende de que exista ms-pedidos) |
+| [ingesta-pedidos](ingesta-pedidos/) | MongoDB de `ms-pedidos` (en la MV BD) | pull 100% | S3 | Implementado |
 
 Ver también [glue-catalog/](glue-catalog/) para el diagrama Entidad/Relación del catálogo y las consultas/vistas de Athena.
 
@@ -20,10 +20,10 @@ Ver también [glue-catalog/](glue-catalog/) para el diagrama Entidad/Relación d
 - [x] Implementar `ingesta-productos` y `ingesta-usuarios` en Python
 - [x] Crear el bucket S3 real en AWS y probar la subida
 - [x] Separar la ingesta a su propia MV Ingesta (EC2 aparte de la MV Backend)
+- [x] Implementar `ingesta-pedidos` en Python (JSON, por los `items` embebidos)
 
 ## Pendiente (para la entrega final)
 
-- [ ] Implementar `ingesta-pedidos` (cuando exista ms-pedidos)
 - [ ] Configurar AWS Glue (un crawler/catálogo por archivo)
 - [ ] Diagrama E/R del catálogo de datos completo
 - [ ] Mínimo 4 consultas SQL (join de varias tablas) + 2 vistas en Athena
