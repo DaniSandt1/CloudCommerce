@@ -2,6 +2,7 @@ const PRODUCTOS_API_URL = import.meta.env.VITE_PRODUCTOS_API_URL || "http://loca
 const USUARIOS_API_URL = import.meta.env.VITE_USUARIOS_API_URL || "http://localhost:8002";
 const PEDIDOS_API_URL = import.meta.env.VITE_PEDIDOS_API_URL || "http://localhost:8003";
 const CHECKOUT_API_URL = import.meta.env.VITE_CHECKOUT_API_URL || "http://localhost:8004";
+const ANALITICA_API_URL = import.meta.env.VITE_ANALITICA_API_URL || "http://localhost:8005";
 
 async function request(url, options) {
   const res = await fetch(url, options);
@@ -50,4 +51,13 @@ export const pedidosApi = {
 export const checkoutApi = {
   resumen: (payload) => postJSON(`${CHECKOUT_API_URL}/checkout/resumen`, payload),
   confirmar: (payload) => postJSON(`${CHECKOUT_API_URL}/checkout/confirmar`, payload),
+};
+
+export const analiticaApi = {
+  ventasPorCategoria: () => request(`${ANALITICA_API_URL}/analitica/ventas-por-categoria`),
+  topClientes: (limit = 10) => request(`${ANALITICA_API_URL}/analitica/top-clientes?limit=${limit}`),
+  pedidosPorRango: (fechaInicio, fechaFin) => {
+    const params = new URLSearchParams({ fecha_inicio: fechaInicio, fecha_fin: fechaFin });
+    return request(`${ANALITICA_API_URL}/analitica/pedidos-por-rango?${params.toString()}`);
+  },
 };

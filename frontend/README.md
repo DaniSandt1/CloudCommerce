@@ -1,6 +1,6 @@
 # Frontend — Web E-commerce
 
-Página web (React + Vite + Tailwind CSS) que consume los microservicios del backend: Productos (`ms-productos`), Usuarios (`ms-usuarios`) y Pedidos (`ms-pedidos`, con el flujo de compra pasando por `ms-checkout`).
+Página web (React + Vite + Tailwind CSS) que consume los 5 microservicios del backend: Productos (`ms-productos`), Usuarios (`ms-usuarios`), Pedidos (`ms-pedidos`, con el flujo de compra pasando por `ms-checkout`) y Analítica (`ms-analitica`).
 
 ## Diseño
 
@@ -15,6 +15,7 @@ Features:
 - **Productos:** paginado y búsqueda server-side por nombre, filtro por categoría (chips), modal de detalle, alta de producto ("+ Nuevo producto").
 - **Usuarios:** paginado y búsqueda server-side por nombre/email, alta de usuario ("+ Nuevo usuario").
 - **Pedidos:** busca los pedidos de un usuario por su ID (usa el mismo buscador de la barra superior), detalle de cada pedido en modal, y un flujo de **"Nuevo pedido"** que arma un carrito simple (ID de producto + cantidad) y lo procesa vía `ms-checkout` — primero `POST /checkout/resumen` para previsualizar precios/stock, luego `POST /checkout/confirmar` para crear el pedido de verdad (que a su vez lo persiste en `ms-pedidos`).
+- **Analítica:** ventas por categoría, top clientes por monto comprado (con selector de cuántos mostrar) y consulta de pedidos por rango de fechas — sin buscador propio (se oculta en esta pestaña).
 
 ## Cómo correr localmente
 
@@ -25,7 +26,7 @@ cp .env.example .env   # ajustar URLs si es necesario
 npm run dev
 ```
 
-Requiere `ms-productos` (8001), `ms-usuarios` (8002), `ms-pedidos` (8003) y `ms-checkout` (8004) corriendo — ver [backend/docker-compose](../backend/docker-compose/).
+Requiere `ms-productos` (8001), `ms-usuarios` (8002), `ms-pedidos` (8003), `ms-checkout` (8004) y `ms-analitica` (8005) corriendo — ver [backend/docker-compose](../backend/docker-compose/).
 
 ## Métodos REST invocados por microservicio
 
@@ -33,9 +34,9 @@ Requiere `ms-productos` (8001), `ms-usuarios` (8002), `ms-pedidos` (8003) y `ms-
 - `ms-usuarios`: `GET /usuarios`, `POST /usuarios`
 - `ms-pedidos`: `GET /usuarios/{id}/pedidos`, `GET /pedidos/{id}`
 - `ms-checkout`: `POST /checkout/resumen`, `POST /checkout/confirmar`
+- `ms-analitica`: `GET /analitica/ventas-por-categoria`, `GET /analitica/top-clientes`, `GET /analitica/pedidos-por-rango`
 
 ## Pendiente (para la entrega final)
 
-- [ ] Vista para ms-analitica
-- [ ] Despliegue en AWS Amplify (ver issue [#1](https://github.com/DaniSandt1/CloudCommerce/issues/1) — requiere actualizar el API Gateway con las rutas de pedidos/checkout)
+- [ ] Despliegue en AWS Amplify (agregar `VITE_ANALITICA_API_URL` a las variables de entorno)
 - [ ] Repositorio público en GitHub (enlace aquí)

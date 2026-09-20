@@ -5,9 +5,10 @@ const TABS = [
   { id: "productos", label: "Productos" },
   { id: "usuarios", label: "Usuarios" },
   { id: "pedidos", label: "Pedidos" },
+  { id: "analitica", label: "Analítica" },
 ];
 
-export default function TopBar({ activeTab, onTabChange, searchQuery, onSearchChange, searchPlaceholder }) {
+export default function TopBar({ activeTab, onTabChange, searchQuery, onSearchChange, searchPlaceholder, showSearch = true }) {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const inputRef = useRef(null);
@@ -56,43 +57,45 @@ export default function TopBar({ activeTab, onTabChange, searchQuery, onSearchCh
           ))}
         </nav>
 
-        <div className="flex items-center gap-1.5 shrink-0">
-          <div className="relative flex items-center">
-            <input
-              ref={inputRef}
-              type="text"
-              value={searchQuery}
-              placeholder={searchPlaceholder}
-              onChange={(e) => onSearchChange(e.target.value)}
-              onKeyDown={handleKeyDown}
-              className={`bg-zinc-100 rounded-md text-sm px-3 py-1.5 text-zinc-800 placeholder:text-zinc-400
-                focus:outline-none focus:ring-2 focus:ring-indigo-200 transition-all duration-200 overflow-hidden
-                ${isSearchOpen ? "w-40 sm:w-56 opacity-100 mr-1" : "w-0 opacity-0 pointer-events-none"}`}
-            />
-            {isSearchOpen && searchQuery && (
-              <button
-                type="button"
-                onClick={() => onSearchChange("")}
-                className="absolute right-3 p-0.5 hover:bg-zinc-200 rounded-full text-zinc-500"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            )}
+        {showSearch && (
+          <div className="flex items-center gap-1.5 shrink-0">
+            <div className="relative flex items-center">
+              <input
+                ref={inputRef}
+                type="text"
+                value={searchQuery}
+                placeholder={searchPlaceholder}
+                onChange={(e) => onSearchChange(e.target.value)}
+                onKeyDown={handleKeyDown}
+                className={`bg-zinc-100 rounded-md text-sm px-3 py-1.5 text-zinc-800 placeholder:text-zinc-400
+                  focus:outline-none focus:ring-2 focus:ring-indigo-200 transition-all duration-200 overflow-hidden
+                  ${isSearchOpen ? "w-40 sm:w-56 opacity-100 mr-1" : "w-0 opacity-0 pointer-events-none"}`}
+              />
+              {isSearchOpen && searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => onSearchChange("")}
+                  className="absolute right-3 p-0.5 hover:bg-zinc-200 rounded-full text-zinc-500"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setIsSearchOpen((v) => !v);
+                if (isSearchOpen) onSearchChange("");
+              }}
+              className={`p-1.5 rounded-md transition-colors text-zinc-700 ${
+                isSearchOpen ? "bg-zinc-100" : "hover:bg-zinc-100"
+              }`}
+              aria-label="Buscar"
+            >
+              <Search className="w-4 h-4" />
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={() => {
-              setIsSearchOpen((v) => !v);
-              if (isSearchOpen) onSearchChange("");
-            }}
-            className={`p-1.5 rounded-md transition-colors text-zinc-700 ${
-              isSearchOpen ? "bg-zinc-100" : "hover:bg-zinc-100"
-            }`}
-            aria-label="Buscar"
-          >
-            <Search className="w-4 h-4" />
-          </button>
-        </div>
+        )}
       </div>
     </div>
   );
