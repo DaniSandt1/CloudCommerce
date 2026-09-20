@@ -1,0 +1,66 @@
+{
+  "info": {
+    "name": "CloudCommerce - ms-analitica (Fase A)",
+    "description": "Consultas analiticas locales con ATHENA_MODE=mock.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/health"
+      },
+      "event": [{
+        "listen": "test",
+        "script": {"exec": [
+          "pm.test('Health responde 200', () => pm.response.to.have.status(200));",
+          "pm.test('Servicio disponible', () => pm.expect(pm.response.json().status).to.eql('ok'));"
+        ]}
+      }]
+    },
+    {
+      "name": "Ventas por categoria",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/analitica/ventas-por-categoria"
+      },
+      "event": [{
+        "listen": "test",
+        "script": {"exec": [
+          "pm.test('Ventas responde 200', () => pm.response.to.have.status(200));",
+          "pm.test('Filas con categoria y monto', () => { const rows = pm.response.json(); pm.expect(rows).to.be.an('array').that.is.not.empty; rows.forEach(row => { pm.expect(row).to.have.property('categoria'); pm.expect(row.total_vendido).to.be.a('number'); }); });"
+        ]}
+      }]
+    },
+    {
+      "name": "Top 5 clientes",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/analitica/top-clientes?limit=5"
+      },
+      "event": [{
+        "listen": "test",
+        "script": {"exec": [
+          "pm.test('Top clientes responde 200', () => pm.response.to.have.status(200));",
+          "pm.test('Devuelve cinco clientes', () => pm.expect(pm.response.json()).to.have.lengthOf(5));"
+        ]}
+      }]
+    },
+    {
+      "name": "Pedidos de 2026",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/analitica/pedidos-por-rango?fecha_inicio=2026-01-01&fecha_fin=2026-12-31"
+      },
+      "event": [{
+        "listen": "test",
+        "script": {"exec": [
+          "pm.test('Pedidos por rango responde 200', () => pm.response.to.have.status(200));",
+          "pm.test('Resumen con cantidad y monto', () => { const row = pm.response.json(); pm.expect(row.cantidad_pedidos).to.be.a('number'); pm.expect(row.monto_total).to.be.a('number'); });"
+        ]}
+      }]
+    }
+  ],
+  "variable": [{"key": "base_url", "value": "http://localhost:8005"}]
+}

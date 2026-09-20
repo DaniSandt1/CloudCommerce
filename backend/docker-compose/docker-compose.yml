@@ -105,6 +105,14 @@ services:
       - ms-usuarios
       - ms-pedidos
 
+  ms-analitica:
+    build: ../ms-analitica
+    restart: unless-stopped
+    environment:
+      ATHENA_MODE: mock
+    ports:
+      - "8005:8000"
+
 volumes:
   mysql_productos_data:
   postgres_usuarios_data:

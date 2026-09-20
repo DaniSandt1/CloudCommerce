@@ -14,6 +14,48 @@ Este microservicio se construye en **dos fases separadas**, porque el proyecto c
 
 Se implementan los 4 endpoints (`/health` + las 3 consultas analíticas) contra `app/athena_client_mock.py`, que devuelve datos fijos con la misma forma (columnas y tipos) que tendría una respuesta real de Athena. La app corre con `ATHENA_MODE=mock` (default) y **no requiere ninguna variable de AWS** — si en algún punto hace falta una `AWS_ACCESS_KEY` para levantar el contenedor, algo está mal en esta fase.
 
+### Ejecutar localmente
+
+Desde `backend/docker-compose`:
+
+```bash
+docker compose up -d --build
+```
+
+Para levantar solo este servicio: `docker compose up -d --build ms-analitica`.
+
+`ms-analitica` queda disponible en `http://localhost:8005`. Su contenedor no
+depende de las bases de datos ni de los otros microservicios. `ATHENA_MODE=mock`
+es el valor predeterminado; `.env.example` no contiene credenciales AWS.
+
+### Endpoints de Fase A
+
+| Metodo | Ruta | Respuesta |
+|---|---|---|
+| GET | `/health` | `{"status":"ok","service":"ms-analitica"}` |
+| GET | `/analitica/ventas-por-categoria` | Lista de `{"categoria":"Tecnologia","total_vendido":1110.0}` |
+| GET | `/analitica/top-clientes?limit=10` | Lista de `{"id_usuario":101,"nombre":"Ana Torres","email":"ana@example.com","total_comprado":610.0}` |
+| GET | `/analitica/pedidos-por-rango?fecha_inicio=2026-01-01&fecha_fin=2026-12-31` | `{"cantidad_pedidos":6,"monto_total":1640.0}` |
+
+`limit` acepta valores de 1 a 100 (predeterminado: 10). Las fechas deben ser
+`YYYY-MM-DD`, son inclusivas y `fecha_inicio` no puede ser posterior a
+`fecha_fin`; entradas invalidas responden `422`. Un rango sin pedidos devuelve
+`{"cantidad_pedidos":0,"monto_total":0.0}`. Los montos mock incluyen los
+pedidos sin filtrar por `estado`, igual que las consultas SQL de esta fase.
+
+Swagger UI: `http://localhost:8005/docs`. La coleccion de Postman esta en
+[`postman/CloudCommerce-ms-analitica.postman_collection.json`](postman/CloudCommerce-ms-analitica.postman_collection.json).
+
+Las consultas usan como referencia los campos exportados por las ingestas y
+asumen las tablas `pedidos`, `productos` y `usuarios`. El catalogo Glue aun no
+esta definido: el exportador actual de pedidos escribe un array JSON exterior
+por archivo, mientras que el SQL de `queries.py` presupone una fila catalogada
+por pedido. Antes de ejecutar ese SQL en Athena, la Fase B debera resolver esa
+representacion en Glue o adaptar `queries.py`. Tambien debera identificar el
+ultimo snapshot incluso si contiene `[]`: un archivo sin filas no aparece en
+`MAX("$path")` y podria hacer que se reutilicen pedidos antiguos. Ninguna ruta
+de Fase A hace llamadas a AWS.
+
 ## Fase B — conexión real a Athena (solo el dueño de la cuenta AWS Academy)
 
 **Quién:** la persona con acceso al Learner Lab. Se hace en un issue aparte, **después** de que Fase A esté mergeada a `main`.
@@ -54,6 +96,8 @@ ms-analitica/
 │   ├── athena_client_real.py      # Fase B (boto3)
 │   ├── queries.py                 # SQL de cada endpoint
 │   └── schemas.py
+├── postman/
+│   └── CloudCommerce-ms-analitica.postman_collection.json
 ├── requirements.txt                # incluye boto3 desde Fase A (no se toca en Fase B)
 ├── Dockerfile
 └── .env.example
@@ -61,6 +105,6 @@ ms-analitica/
 
 ## Pendiente
 
-- [ ] Fase A: endpoints + mock (issue #4)
+- [x] Fase A: endpoints + mock (issue #4)
 - [ ] Fase B: cliente real de Athena (issue aparte, tras mergear Fase A)
 - [ ] Repositorio público en GitHub (enlace aquí)
