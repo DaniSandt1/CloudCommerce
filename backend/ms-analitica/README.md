@@ -56,16 +56,16 @@ ultimo snapshot incluso si contiene `[]`: un archivo sin filas no aparece en
 `MAX("$path")` y podria hacer que se reutilicen pedidos antiguos. Ninguna ruta
 de Fase A hace llamadas a AWS.
 
-## Fase B — conexión real a Athena (solo el dueño de la cuenta AWS Academy)
+## Fase B — conexión real a Athena
 
-**Quién:** la persona con acceso al Learner Lab. Se hace en un issue aparte, **después** de que Fase A esté mergeada a `main`.
+**Código: ✅ implementado** (`app/athena_client_real.py`). **Infraestructura: ✅ lista** — catálogo Glue creado (`cloudcommerce_datalake`, tablas `raw_productos`/`raw_usuarios`/`raw_pedidos`), `ingesta-pedidos` sube NDJSON (una fila por pedido, necesario para que `CROSS JOIN UNNEST(items)` funcione en Athena).
 
-### Pre-requisitos
+### Pre-requisitos (todos cumplidos)
 
-1. Fase A (issue #4) mergeada — los endpoints y la interfaz `athena_client.run_query(sql) -> list[dict]` ya existen.
-2. El pipeline de `data-science/` (`ingesta-productos`, `ingesta-usuarios`, `ingesta-pedidos`) subiendo datos a `s3://cloudcommerce-datalake/`.
-3. Catálogo de Glue configurado sobre esos datos (ver [`data-science/glue-catalog/`](../../data-science/glue-catalog/)) — sin tablas en Glue no hay qué consultar desde Athena.
-4. Un workgroup de Athena con ubicación de resultados en S3 (ej. `s3://cloudcommerce-datalake/athena-results/`).
+1. ✅ Fase A mergeada — los endpoints y la interfaz `athena_client.run_query(sql) -> list[dict]` ya existían.
+2. ✅ El pipeline de `data-science/` (`ingesta-productos`, `ingesta-usuarios`, `ingesta-pedidos`) sube a `s3://cloudcommerce-datalake/`.
+3. ✅ Catálogo de Glue configurado (`cloudcommerce_datalake`) — ver [`data-science/glue-catalog/`](../../data-science/glue-catalog/).
+4. ⏳ Workgroup de Athena con ubicación de resultados en S3 — configúralo al desplegar (ver abajo).
 
 ### Credenciales
 
@@ -74,16 +74,23 @@ AWS Academy Learner Lab no permite crear usuarios/roles IAM propios, así que ha
 - **Corriendo en una EC2 dentro del lab (recomendado, mismo criterio que ya usa `ingesta-productos`):** adjuntar el `LabInstanceProfile` a la instancia y dejar `AWS_ACCESS_KEY_ID`/`AWS_SECRET_ACCESS_KEY` vacíos en `.env` — boto3 toma las credenciales del rol de la instancia automáticamente.
 - **Corriendo en tu laptop (para probar antes de desplegar):** copiar el bloque de credenciales temporales desde "AWS Details" del Learner Lab (`aws_access_key_id`, `aws_secret_access_key`, `aws_session_token`) a `~/.aws/credentials` o a un `.env` local **que no se commitea**. Estas credenciales expiran junto con la sesión del lab (unas pocas horas) — hay que renovarlas cada vez que se reinicia el lab.
 
-### Implementación
+### Cómo activarlo (pendiente de ejecutar)
 
-1. Crear `app/athena_client_real.py` con la misma firma que el mock: `run_query(sql: str) -> list[dict]`, usando `boto3.client("athena")`:
-   - `start_query_execution(QueryString=sql, QueryExecutionContext={"Database": ATHENA_DATABASE}, ResultConfiguration={"OutputLocation": ATHENA_OUTPUT_S3})`
-   - Poll de `get_query_execution` hasta `SUCCEEDED` (o levantar error en `FAILED`/`CANCELLED`).
-   - `get_query_results` y parsear filas a `list[dict]` con los mismos nombres de columna que usó el mock.
-2. Nuevas variables de entorno: `ATHENA_DATABASE`, `ATHENA_OUTPUT_S3`, y `ATHENA_MODE=real`.
-3. Probar cada uno de los 3 endpoints analíticos contra datos reales y comparar que la forma de la respuesta siga siendo la misma que en Fase A (si no coincide, es el frontend el que se rompe después).
-4. Si las columnas reales del catálogo Glue no coinciden con lo que Fase A asumió en el mock, ajustar `app/queries.py` (no los endpoints).
-5. Actualizar este README: mover esta sección de "pre-requisitos" a un estado de "✅ implementado", igual que ya está documentado en `ms-productos/README.md`.
+En la EC2 donde corre `ms-analitica` (`cloudcommerce-prod2`, ver [DEPLOYMENT.md](../../DEPLOYMENT.md)):
+
+```bash
+# docker-compose.yml de esa VM, servicio ms-analitica:
+environment:
+  ATHENA_MODE: real
+  ATHENA_DATABASE: cloudcommerce_datalake
+  ATHENA_OUTPUT_S3: s3://cloudcommerce-datalake/athena-results/
+```
+```bash
+docker compose up -d --build ms-analitica
+curl localhost:8005/analitica/ventas-por-categoria   # debe responder con datos reales, no los 8 fijos del mock
+```
+
+Si las columnas reales del catálogo no coinciden con lo que asumió `app/queries.py`, ajustar ahí (no los endpoints ni los schemas).
 
 ## Estructura
 
@@ -106,5 +113,6 @@ ms-analitica/
 ## Pendiente
 
 - [x] Fase A: endpoints + mock (issue #4)
-- [ ] Fase B: cliente real de Athena (issue aparte, tras mergear Fase A)
+- [x] Fase B: cliente real de Athena — código listo, catálogo Glue creado
+- [ ] Fase B: desplegar con `ATHENA_MODE=real` en `cloudcommerce-prod2` y verificar contra datos reales
 - [ ] Repositorio público en GitHub (enlace aquí)
