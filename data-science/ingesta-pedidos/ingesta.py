@@ -1,6 +1,10 @@
 """Ingesta pull del 100% de la colección `pedidos` (MongoDB de ms-pedidos) hacia S3.
 
-Genera un archivo JSON (array de documentos) con timestamp y lo sube al bucket S3 configurado.
+Genera un archivo NDJSON (un documento JSON por línea, sin array envolvente)
+con timestamp y lo sube al bucket S3 configurado. NDJSON en vez de un array
+JSON es lo que permite que un crawler de AWS Glue / Athena lea cada pedido
+como una fila independiente de la tabla, en vez de todo el archivo como una
+sola fila.
 """
 import json
 import os
@@ -40,7 +44,7 @@ def subir_a_s3(contenido_json: str, key: str):
 def main():
     documentos = extraer_pedidos()
     print(f"Extraídos {len(documentos)} pedidos de MongoDB.")
-    contenido = json.dumps(documentos, ensure_ascii=False)
+    contenido = "\n".join(json.dumps(doc, ensure_ascii=False) for doc in documentos)
     timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
     key = f"{S3_PREFIX}/pedidos_{timestamp}.json"
     subir_a_s3(contenido, key)

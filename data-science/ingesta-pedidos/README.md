@@ -17,7 +17,7 @@ Las credenciales AWS se toman del rol IAM de la instancia (`LabInstanceProfile`)
 
 ## Formato de salida
 
-A diferencia de `ingesta-productos`/`ingesta-usuarios` (CSV, tablas relacionales), acá se sube un **JSON** (array de documentos) porque `pedidos` tiene `items` embebidos — aplanarlo a CSV perdería esa estructura. El enunciado permite explícitamente csv o json.
+A diferencia de `ingesta-productos`/`ingesta-usuarios` (CSV, tablas relacionales), acá se sube **NDJSON** (un documento JSON por línea, *sin* array envolvente) porque `pedidos` tiene `items` embebidos — aplanarlo a CSV perdería esa estructura, y el enunciado permite explícitamente csv o json. NDJSON (no un array JSON con todo adentro) es importante para que un crawler de AWS Glue lea cada línea como una fila independiente de la tabla — un solo array JSON grande se leería como una única fila.
 
 ## Estado
 
