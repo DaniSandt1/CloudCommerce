@@ -1,10 +1,8 @@
 """Ingesta pull del 100% de la colección `pedidos` (MongoDB de ms-pedidos) hacia S3.
 
-Genera un archivo NDJSON (un documento JSON por línea, sin array envolvente)
-con timestamp y lo sube al bucket S3 configurado. NDJSON en vez de un array
-JSON es lo que permite que un crawler de AWS Glue / Athena lea cada pedido
-como una fila independiente de la tabla, en vez de todo el archivo como una
-sola fila.
+Genera un archivo JSON Lines (un documento por línea) con timestamp y lo sube
+al bucket S3 configurado. El formato permite que Glue y Athena interpreten cada
+pedido como una fila, mientras conserva los items embebidos.
 """
 import json
 import os
@@ -33,20 +31,32 @@ def extraer_pedidos():
         client.close()
 
 
-def subir_a_s3(contenido_json: str, key: str):
+def pedidos_a_jsonl(documentos: list[dict]) -> str:
+    """Serializa cada pedido como una línea JSON independiente para Glue."""
+    return "\n".join(json.dumps(documento, ensure_ascii=False, default=str) for documento in documentos) + (
+        "\n" if documentos else ""
+    )
+
+
+def subir_a_s3(contenido_jsonl: str, key: str):
     if not S3_BUCKET:
         raise RuntimeError("Falta la variable de entorno S3_BUCKET_NAME")
     s3 = boto3.client("s3")
-    s3.put_object(Bucket=S3_BUCKET, Key=key, Body=contenido_json.encode("utf-8"))
+    s3.put_object(
+        Bucket=S3_BUCKET,
+        Key=key,
+        Body=contenido_jsonl.encode("utf-8"),
+        ContentType="application/x-ndjson",
+    )
     print(f"Subido s3://{S3_BUCKET}/{key}")
 
 
 def main():
     documentos = extraer_pedidos()
     print(f"Extraídos {len(documentos)} pedidos de MongoDB.")
-    contenido = "\n".join(json.dumps(doc, ensure_ascii=False) for doc in documentos)
+    contenido = pedidos_a_jsonl(documentos)
     timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
-    key = f"{S3_PREFIX}/pedidos_{timestamp}.json"
+    key = f"{S3_PREFIX}/pedidos_{timestamp}.jsonl"
     subir_a_s3(contenido, key)
 
 

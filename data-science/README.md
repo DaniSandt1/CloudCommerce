@@ -1,7 +1,7 @@
 # Data Science — Ingesta y Analítica
 
 - **MV Ingesta:** máquina virtual dedicada (separada de la MV Backend) donde corren los 3 contenedores docker de ingesta. Ver [DEPLOYMENT.md](../DEPLOYMENT.md).
-- **Bucket S3:** almacena los archivos (csv/json) generados por la ingesta.
+- **Bucket S3:** almacena los archivos CSV/JSON Lines generados por la ingesta.
 - **Catálogo de datos (AWS Glue):** un catálogo por cada archivo cargado a S3.
 - **Consultas (AWS Athena):** mínimo 4 consultas SQL que unan varias tablas + mínimo 2 vistas.
 
@@ -20,7 +20,7 @@ Ver también [glue-catalog/](glue-catalog/) para el diagrama Entidad/Relación d
 - [x] Implementar `ingesta-productos` y `ingesta-usuarios` en Python
 - [x] Crear el bucket S3 real en AWS y probar la subida
 - [x] Separar la ingesta a su propia MV Ingesta (EC2 aparte de la MV Backend)
-- [x] Implementar `ingesta-pedidos` en Python (JSON, por los `items` embebidos)
+- [x] Implementar `ingesta-pedidos` en Python (JSON Lines, conserva los `items` embebidos y es legible por Glue/Athena)
 
 ## Pendiente (para la entrega final)
 

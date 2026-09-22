@@ -1,6 +1,6 @@
 # ingesta-pedidos
 
-Contenedor Docker en Python que hace *pull* del 100% de los documentos de la colección `pedidos` (MongoDB, de `ms-pedidos`), genera un JSON y lo sube al bucket S3. **Implementado.**
+Contenedor Docker en Python que hace *pull* del 100% de los documentos de la colección `pedidos` (MongoDB, de `ms-pedidos`), genera un archivo JSON Lines (`.jsonl`) y lo sube al bucket S3. **Implementado.**
 
 ## Cómo correr
 
@@ -17,8 +17,10 @@ Las credenciales AWS se toman del rol IAM de la instancia (`LabInstanceProfile`)
 
 ## Formato de salida
 
-A diferencia de `ingesta-productos`/`ingesta-usuarios` (CSV, tablas relacionales), acá se sube **NDJSON** (un documento JSON por línea, *sin* array envolvente) porque `pedidos` tiene `items` embebidos — aplanarlo a CSV perdería esa estructura, y el enunciado permite explícitamente csv o json. NDJSON (no un array JSON con todo adentro) es importante para que un crawler de AWS Glue lea cada línea como una fila independiente de la tabla — un solo array JSON grande se leería como una única fila.
+A diferencia de `ingesta-productos`/`ingesta-usuarios` (CSV, tablas relacionales), acá se sube **JSON Lines (NDJSON)**: cada línea es un pedido JSON completo, sin array envolvente. Así se conservan los `items` embebidos sin aplanarlos a CSV y Glue/Athena puede leer cada pedido como una fila.
+
+Los archivos se guardan como `pedidos/pedidos_<timestamp>.jsonl`, con tipo de contenido `application/x-ndjson`. Al crear la tabla en Glue, configura el formato JSON Lines y define `items` como una colección anidada. Un snapshot vacío se guarda como archivo vacío y no genera filas.
 
 ## Estado
 
-✅ Sube correctamente el JSON con los pedidos a `s3://cloudcommerce-datalake/pedidos/`.
+✅ Sube JSON Lines con los pedidos a `s3://cloudcommerce-datalake/pedidos/`.
