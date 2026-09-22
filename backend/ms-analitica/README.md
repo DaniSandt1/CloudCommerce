@@ -58,14 +58,14 @@ de Fase A hace llamadas a AWS.
 
 ## Fase B — conexión real a Athena
 
-**Código: ✅ implementado** (`app/athena_client_real.py`). **Infraestructura: ✅ lista** — catálogo Glue creado (`cloudcommerce_datalake`, tablas `raw_productos`/`raw_usuarios`/`raw_pedidos`), `ingesta-pedidos` sube NDJSON (una fila por pedido, necesario para que `CROSS JOIN UNNEST(items)` funcione en Athena).
+**✅ Implementada, desplegada y verificada.** `ms-analitica` corre con `ATHENA_MODE=real` en `cloudcommerce-prod2`, consultando el catálogo Glue `cloudcommerce_datalake` (tablas `productos`/`usuarios`/`pedidos` — **sin** prefijo, tal como las espera `app/queries.py`). Los 3 endpoints responden con datos reales de los 20,000 pedidos, coincidiendo con lo consultado directo en el editor de Athena.
 
 ### Pre-requisitos (todos cumplidos)
 
 1. ✅ Fase A mergeada — los endpoints y la interfaz `athena_client.run_query(sql) -> list[dict]` ya existían.
-2. ✅ El pipeline de `data-science/` (`ingesta-productos`, `ingesta-usuarios`, `ingesta-pedidos`) sube a `s3://cloudcommerce-datalake/`.
-3. ✅ Catálogo de Glue configurado (`cloudcommerce_datalake`) — ver [`data-science/glue-catalog/`](../../data-science/glue-catalog/).
-4. ⏳ Workgroup de Athena con ubicación de resultados en S3 — configúralo al desplegar (ver abajo).
+2. ✅ El pipeline de `data-science/` (`ingesta-productos`, `ingesta-usuarios`, `ingesta-pedidos`) sube a `s3://cloudcommerce-datalake/`. `ingesta-pedidos` sube **NDJSON** (un documento por línea, sin array envolvente) — imprescindible para que el crawler exponga cada pedido como una fila y `CROSS JOIN UNNEST(items)` funcione en Athena.
+3. ✅ Catálogo de Glue configurado (`cloudcommerce_datalake`, database + crawler sobre los 3 prefijos de S3) — ver [`data-science/glue-catalog/`](../../data-science/glue-catalog/).
+4. ✅ Workgroup `primary` de Athena con resultados en `s3://cloudcommerce-datalake/athena-results/`.
 
 ### Credenciales
 
@@ -74,21 +74,28 @@ AWS Academy Learner Lab no permite crear usuarios/roles IAM propios, así que ha
 - **Corriendo en una EC2 dentro del lab (recomendado, mismo criterio que ya usa `ingesta-productos`):** adjuntar el `LabInstanceProfile` a la instancia y dejar `AWS_ACCESS_KEY_ID`/`AWS_SECRET_ACCESS_KEY` vacíos en `.env` — boto3 toma las credenciales del rol de la instancia automáticamente.
 - **Corriendo en tu laptop (para probar antes de desplegar):** copiar el bloque de credenciales temporales desde "AWS Details" del Learner Lab (`aws_access_key_id`, `aws_secret_access_key`, `aws_session_token`) a `~/.aws/credentials` o a un `.env` local **que no se commitea**. Estas credenciales expiran junto con la sesión del lab (unas pocas horas) — hay que renovarlas cada vez que se reinicia el lab.
 
-### Cómo activarlo (pendiente de ejecutar)
+### Cómo está activado
 
 En la EC2 donde corre `ms-analitica` (`cloudcommerce-prod2`, ver [DEPLOYMENT.md](../../DEPLOYMENT.md)):
 
-```bash
+```yaml
 # docker-compose.yml de esa VM, servicio ms-analitica:
 environment:
   ATHENA_MODE: real
   ATHENA_DATABASE: cloudcommerce_datalake
   ATHENA_OUTPUT_S3: s3://cloudcommerce-datalake/athena-results/
+  AWS_DEFAULT_REGION: us-east-1
 ```
 ```bash
 docker compose up -d --build ms-analitica
-curl localhost:8005/analitica/ventas-por-categoria   # debe responder con datos reales, no los 8 fijos del mock
+curl localhost:8005/analitica/ventas-por-categoria
 ```
+
+### Problemas encontrados al activarlo (por si el lab se reinicia y hay que rehacerlo)
+
+1. **`NoRegionError`** — boto3 no infiere la región dentro del contenedor. Hace falta `AWS_DEFAULT_REGION=us-east-1` explícito en el `environment` del compose.
+2. **`NoCredentialsError`** — `cloudcommerce-prod2` no tenía ningún rol IAM asociado (a diferencia de `cloudcommerce-ingesta`, que sí lo tenía desde el principio). Arreglo: **EC2 → Instances → `cloudcommerce-prod2` → Actions → Security → Modify IAM role → `LabInstanceProfile`** (no requiere detener la instancia, solo reiniciar el contenedor después).
+3. **`TABLE_NOT_FOUND`** — el crawler de Glue se corrió con table prefix `raw_`, pero `app/queries.py` espera los nombres de tabla sin prefijo (`productos`, `usuarios`, `pedidos`). Se resolvió borrando las tablas `raw_*` y volviendo a correr el crawler sin prefijo.
 
 Si las columnas reales del catálogo no coinciden con lo que asumió `app/queries.py`, ajustar ahí (no los endpoints ni los schemas).
 
@@ -113,6 +120,5 @@ ms-analitica/
 ## Pendiente
 
 - [x] Fase A: endpoints + mock (issue #4)
-- [x] Fase B: cliente real de Athena — código listo, catálogo Glue creado
-- [ ] Fase B: desplegar con `ATHENA_MODE=real` en `cloudcommerce-prod2` y verificar contra datos reales
+- [x] Fase B: cliente real de Athena, desplegado en `cloudcommerce-prod2` con `ATHENA_MODE=real` y **verificado contra datos reales** (20,000 pedidos, montos y top clientes coinciden con lo consultado directo en Athena)
 - [ ] Repositorio público en GitHub (enlace aquí)

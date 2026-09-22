@@ -4,7 +4,13 @@ E-commerce simple para cumplir con los requisitos del Proyecto Parcial (Semana 3
 
 ## Integrantes del grupo
 
-- (completar)
+- Daniel Guillermo Sandoval Toro
+- Jose Ernesto Guerrero Cueva
+- Ian Jesus Rodríguez Santayana
+- Vannia Fatima Curay Mauricio
+- Mia Wood De la Fuente Chavez
+
+Repositorio: **https://github.com/DaniSandt1/CloudCommerce**
 
 ## Arquitectura general
 
@@ -56,18 +62,18 @@ Data Science: MV Ingesta (3 contenedores docker en Python, pull 100%) → Bucket
 
 ## Estado actual
 
-**Avance (Hito 1): COMPLETO ✅.** **Arquitectura de producción final (Hito 2): DESPLEGADA ✅** — los 4 microservicios con BD/consumo que exige el enunciado están implementados y corriendo en AWS con la arquitectura final: 2 MV de producción + balanceador de carga privado + 3ra MV de bases de datos, todo detrás de API Gateway y con el frontend en Amplify. Solo falta `ms-analitica`.
+**Avance (Hito 1): COMPLETO ✅.** **Arquitectura de producción final (Hito 2): DESPLEGADA Y VERIFICADA ✅** — los 5 microservicios que exige el enunciado están implementados y corriendo en AWS con la arquitectura final: 2 MV de producción + balanceador de carga privado + 3ra MV de bases de datos, todo detrás de API Gateway y con el frontend en Amplify.
 
 - ✅ `ms-productos` (Python/FastAPI + MySQL) — 20,000 productos, CRUD completo, paginado/búsqueda
 - ✅ `ms-usuarios` (Java/Spring Boot + PostgreSQL) — 20,000 usuarios, CRUD completo, paginado/búsqueda
 - ✅ `ms-pedidos` (Node.js/Express + MongoDB) — 20,000 pedidos, consume `ms-productos`/`ms-usuarios`
 - ✅ `ms-checkout` (Python/FastAPI, sin BD) — orquesta `ms-productos`+`ms-usuarios`+`ms-pedidos` para el flujo de compra
-- ✅ `frontend` (React) — pestañas Productos, Usuarios y Pedidos, desplegado en AWS Amplify
+- ✅ `ms-analitica` (Python/FastAPI + boto3/Athena) — Fase A y Fase B completas, `ATHENA_MODE=real` desplegado en `cloudcommerce-prod2`, verificado contra los 20,000 pedidos reales
+- ✅ `frontend` (React) — pestañas Productos, Usuarios, Pedidos y Analítica, desplegado en AWS Amplify
 - ✅ `ingesta-productos`, `ingesta-usuarios` e `ingesta-pedidos` (Python → S3) — los 3 contenedores requeridos, corriendo en su propia **MV Ingesta**, bucket `cloudcommerce-datalake`
-- ✅ **Arquitectura final**: MV Producción 1 (`ms-productos`+`ms-usuarios`), MV Producción 2 (`ms-pedidos`+`ms-checkout`), 3ra MV privada solo con las bases de datos, balanceador de carga interno (ALB + VPC Link) delante de las 2 MV de producción, API Gateway público apuntando al balanceador — ver [DEPLOYMENT.md, Parte E](DEPLOYMENT.md)
-- ⏳ `ms-analitica` — Fase A (mock de Athena) pendiente, issue [#4](https://github.com/DaniSandt1/CloudCommerce/issues/4)
-- ⏳ AWS Glue (catálogo de datos) + mínimo 4 consultas SQL / 2 vistas en Athena
-- ⏳ Diagrama de Arquitectura de Solución en draw.io, informe y presentación finales
+- ✅ **Arquitectura final**: MV Producción 1 (`ms-productos`+`ms-usuarios`), MV Producción 2 (`ms-pedidos`+`ms-checkout`+`ms-analitica`), 3ra MV privada solo con las bases de datos, balanceador de carga interno (ALB + VPC Link) delante de las 2 MV de producción, API Gateway público (5 rutas) apuntando al balanceador — ver [DEPLOYMENT.md, Parte E](DEPLOYMENT.md)
+- ✅ AWS Glue (catálogo `cloudcommerce_datalake`, 3 tablas) + mínimo 4 consultas SQL con join + 2 vistas en Athena — evidencia en el informe
+- ⏳ Diagrama de Arquitectura de Solución en draw.io (actualizar `ms-analitica` de pendiente a desplegado), informe y presentación finales — en curso
 
 ### Cómo correrlo (AWS + local)
 

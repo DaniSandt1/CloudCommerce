@@ -24,7 +24,7 @@ Ver también [glue-catalog/](glue-catalog/) para el diagrama Entidad/Relación d
 
 ## Pendiente (para la entrega final)
 
-- [ ] Configurar AWS Glue (un crawler/catálogo por archivo)
-- [ ] Diagrama E/R del catálogo de datos completo
-- [ ] Mínimo 4 consultas SQL (join de varias tablas) + 2 vistas en Athena
-- [ ] Repositorio público en GitHub (enlace aquí)
+- [x] Configurar AWS Glue — base `cloudcommerce_datalake`, 3 tablas (`productos`, `usuarios`, `pedidos`)
+- [x] Diagrama E/R del catálogo de datos completo — ver informe (`docs/informe/`)
+- [x] Mínimo 4 consultas SQL (join de varias tablas) + 2 vistas en Athena — evidencia en el informe
+- [x] Repositorio público en GitHub — https://github.com/DaniSandt1/CloudCommerce

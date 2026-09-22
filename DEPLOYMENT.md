@@ -854,16 +854,16 @@ Pasa cuando `AMPLIFY_MONOREPO_APP_ROOT` está seteado (modo Monorepo activado) p
 ## Qué falta para la entrega final (Hito 2)
 
 - [x] Implementar `ms-pedidos` (Node.js + MongoDB) y `ms-checkout` (sin BD) — PR [#5](https://github.com/DaniSandt1/CloudCommerce/pull/5)
-- [ ] Implementar `ms-analitica` Fase A (Athena mockeado) — issue [#4](https://github.com/DaniSandt1/CloudCommerce/issues/4)
-- [x] AWS API Gateway (https) público delante del backend — las 4 rutas (productos/usuarios/pedidos/checkout)
-- [x] Desplegar el frontend en AWS Amplify — con las pestañas Productos, Usuarios y Pedidos
-- [x] Repartir los 4 microservicios en 2 MV de producción + balanceador de carga privado — **Parte E ejecutada**: `cloudcommerce-backend` (productos+usuarios) / `cloudcommerce-prod2` (pedidos+checkout) detrás de `cloudcommerce-lb` (ALB interno)
+- [x] Implementar `ms-analitica` Fase A (mock) y Fase B (`ATHENA_MODE=real`, desplegado en `cloudcommerce-prod2` y verificado contra los 20,000 pedidos reales) — issue [#4](https://github.com/DaniSandt1/CloudCommerce/issues/4)
+- [x] AWS API Gateway (https) público delante del backend — las 5 rutas (productos/usuarios/pedidos/checkout/analitica)
+- [x] Desplegar el frontend en AWS Amplify — con las pestañas Productos, Usuarios, Pedidos y Analítica
+- [x] Repartir los 5 microservicios en 2 MV de producción + balanceador de carga privado — **Parte E ejecutada**: `cloudcommerce-backend` (productos+usuarios) / `cloudcommerce-prod2` (pedidos+checkout+analitica) detrás de `cloudcommerce-lb` (ALB interno)
 - [x] Mover las bases de datos a una 3ra MV privada (no pública) — `cloudcommerce-bd`, sin IP pública en uso, solo accesible por IP privada desde las MV de producción/ingesta
-- [x] Apuntar el API Gateway al balanceador de carga vía VPC Link — las 4 rutas usan integración `Private` a través de `cloudcommerce-vpclink`
-- [x] Rutas de API Gateway + variables de Amplify para `ms-pedidos`/`ms-checkout`
+- [x] Apuntar el API Gateway al balanceador de carga vía VPC Link — las 5 rutas usan integración `Private` a través de `cloudcommerce-vpclink`
+- [x] Rutas de API Gateway + variables de Amplify para `ms-pedidos`/`ms-checkout`/`ms-analitica`
 - [x] MV "ingesta" dedicada para los contenedores de ingesta — los 3 (`ingesta-productos`, `ingesta-usuarios`, `ingesta-pedidos`)
-- [ ] AWS Glue (catálogo de datos) + diagrama E/R del catálogo
-- [ ] Mínimo 4 consultas SQL + 2 vistas en Athena
-- [ ] Diagrama de Arquitectura de Solución en draw.io
-- [x] Documentación Swagger-UI — 4/5 APIs (`ms-productos` `/docs`, `ms-usuarios` `/swagger-ui.html`, `ms-pedidos` `/docs`, `ms-checkout` `/docs`); falta `ms-analitica`
-- [ ] Informe y presentación finales
+- [x] AWS Glue (catálogo de datos, base `cloudcommerce_datalake`) + diagrama E/R del catálogo — evidencia en el informe
+- [x] Mínimo 4 consultas SQL + 2 vistas en Athena — evidencia en el informe
+- [ ] Diagrama de Arquitectura de Solución en draw.io — actualizar `ms-analitica` de "pendiente" a desplegado
+- [x] Documentación Swagger-UI — 5/5 APIs (`ms-productos` `/docs`, `ms-usuarios` `/swagger-ui.html`, `ms-pedidos` `/docs`, `ms-checkout` `/docs`, `ms-analitica` `/docs`)
+- [ ] Informe y presentación finales — informe en redacción, capturas de AWS en curso
