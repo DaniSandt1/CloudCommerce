@@ -1,0 +1,604 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="E-R · Bases de los microservicios" id="er-operacional">
+    <mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1360" pageHeight="1000" math="0" shadow="0">
+      <root>
+        <mxCell id="er-operacional-0" />
+        <mxCell id="er-operacional-1" parent="er-operacional-0" />
+        <mxCell id="er-operacional-t1" parent="er-operacional-1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=18;fontColor=#232F3E;" value="&lt;b&gt;CloudCommerce — Diagrama E/R de las bases de datos de los microservicios&lt;/b&gt;" vertex="1">
+          <mxGeometry x="40" y="14" width="1280" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-t1s" parent="er-operacional-1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=12;fontColor=#545B64;" value="Las 3 bases viven en la MV privada &lt;b&gt;cloudcommerce-bd&lt;/b&gt;. Cada microservicio es dueño de su base (no comparten tablas)." vertex="1">
+          <mxGeometry x="40" y="46" width="1280" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-pg" parent="er-operacional-1" style="rounded=1;arcSize=3;whiteSpace=wrap;html=1;container=1;collapsible=0;fillColor=#F2F6FA;strokeColor=#336791;strokeWidth=1.5;dashed=1;dashPattern=8 4;align=left;verticalAlign=top;spacingLeft=14;spacingTop=8;fontSize=12;fontColor=#336791;" value="&lt;b style='font-size:14px'&gt;PostgreSQL 16 · usuarios_db&lt;/b&gt;&lt;br&gt;&lt;font color='#545B64'&gt;dueño: ms-usuarios (Java · Spring Boot / JPA)&lt;/font&gt;" vertex="1">
+          <mxGeometry x="40" y="76" width="600" height="334" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-usuarios" parent="er-operacional-pg" style="swimlane;html=1;startSize=44;horizontal=1;collapsible=0;rounded=1;arcSize=6;fillColor=#336791;swimlaneFillColor=#FFFFFF;strokeColor=#336791;strokeWidth=2;fontColor=#FFFFFF;fontSize=13;" value="&lt;b&gt;usuarios&lt;/b&gt;&lt;br&gt;&lt;span style='font-size:10px;font-weight:normal'&gt;tabla&lt;/span&gt;" vertex="1">
+          <mxGeometry x="30" y="70" width="280" height="174" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-usuarios_r0" parent="er-operacional-usuarios" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=#F4F6F8;align=left;spacingLeft=8;fontColor=#232F3E;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontStyle=1;" value="id" vertex="1">
+          <mxGeometry x="0" y="44" width="280" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-usuarios_r0t" parent="er-operacional-usuarios" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=left;fontColor=#545B64;" value="BIGINT" vertex="1">
+          <mxGeometry x="112" y="44" width="84" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-usuarios_r0b" parent="er-operacional-usuarios" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=right;spacingRight=8;fontColor=#0B6E4F;fontStyle=1;" value="PK" vertex="1">
+          <mxGeometry x="196" y="44" width="84" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-usuarios_r1" parent="er-operacional-usuarios" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=#FFFFFF;align=left;spacingLeft=8;fontColor=#232F3E;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" value="nombre" vertex="1">
+          <mxGeometry x="0" y="70" width="280" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-usuarios_r1t" parent="er-operacional-usuarios" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=left;fontColor=#545B64;" value="VARCHAR(150)" vertex="1">
+          <mxGeometry x="112" y="70" width="84" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-usuarios_r2" parent="er-operacional-usuarios" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=#F4F6F8;align=left;spacingLeft=8;fontColor=#232F3E;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" value="email" vertex="1">
+          <mxGeometry x="0" y="96" width="280" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-usuarios_r2t" parent="er-operacional-usuarios" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=left;fontColor=#545B64;" value="VARCHAR(150)" vertex="1">
+          <mxGeometry x="112" y="96" width="84" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-usuarios_r2b" parent="er-operacional-usuarios" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=right;spacingRight=8;fontColor=#0B6E4F;fontStyle=1;" value="UQ" vertex="1">
+          <mxGeometry x="196" y="96" width="84" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-usuarios_r3" parent="er-operacional-usuarios" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=#FFFFFF;align=left;spacingLeft=8;fontColor=#232F3E;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" value="password_hash" vertex="1">
+          <mxGeometry x="0" y="122" width="280" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-usuarios_r3t" parent="er-operacional-usuarios" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=left;fontColor=#545B64;" value="VARCHAR(255)" vertex="1">
+          <mxGeometry x="112" y="122" width="84" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-usuarios_r4" parent="er-operacional-usuarios" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=#F4F6F8;align=left;spacingLeft=8;fontColor=#232F3E;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" value="fecha_registro" vertex="1">
+          <mxGeometry x="0" y="148" width="280" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-usuarios_r4t" parent="er-operacional-usuarios" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=left;fontColor=#545B64;" value="TIMESTAMP" vertex="1">
+          <mxGeometry x="112" y="148" width="84" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-direcciones" parent="er-operacional-pg" style="swimlane;html=1;startSize=44;horizontal=1;collapsible=0;rounded=1;arcSize=6;fillColor=#336791;swimlaneFillColor=#FFFFFF;strokeColor=#336791;strokeWidth=2;fontColor=#FFFFFF;fontSize=13;" value="&lt;b&gt;direcciones&lt;/b&gt;&lt;br&gt;&lt;span style='font-size:10px;font-weight:normal'&gt;tabla&lt;/span&gt;" vertex="1">
+          <mxGeometry x="350" y="70" width="240" height="174" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-direcciones_r0" parent="er-operacional-direcciones" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=#F4F6F8;align=left;spacingLeft=8;fontColor=#232F3E;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontStyle=1;" value="id" vertex="1">
+          <mxGeometry x="0" y="44" width="240" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-direcciones_r0t" parent="er-operacional-direcciones" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=left;fontColor=#545B64;" value="BIGINT" vertex="1">
+          <mxGeometry x="96" y="44" width="72" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-direcciones_r0b" parent="er-operacional-direcciones" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=right;spacingRight=8;fontColor=#0B6E4F;fontStyle=1;" value="PK" vertex="1">
+          <mxGeometry x="168" y="44" width="72" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-direcciones_r1" parent="er-operacional-direcciones" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=#FFFFFF;align=left;spacingLeft=8;fontColor=#232F3E;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" value="calle" vertex="1">
+          <mxGeometry x="0" y="70" width="240" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-direcciones_r1t" parent="er-operacional-direcciones" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=left;fontColor=#545B64;" value="VARCHAR(200)" vertex="1">
+          <mxGeometry x="96" y="70" width="72" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-direcciones_r2" parent="er-operacional-direcciones" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=#F4F6F8;align=left;spacingLeft=8;fontColor=#232F3E;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" value="ciudad" vertex="1">
+          <mxGeometry x="0" y="96" width="240" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-direcciones_r2t" parent="er-operacional-direcciones" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=left;fontColor=#545B64;" value="VARCHAR(100)" vertex="1">
+          <mxGeometry x="96" y="96" width="72" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-direcciones_r3" parent="er-operacional-direcciones" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=#FFFFFF;align=left;spacingLeft=8;fontColor=#232F3E;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" value="pais" vertex="1">
+          <mxGeometry x="0" y="122" width="240" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-direcciones_r3t" parent="er-operacional-direcciones" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=left;fontColor=#545B64;" value="VARCHAR(100)" vertex="1">
+          <mxGeometry x="96" y="122" width="72" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-direcciones_r4" parent="er-operacional-direcciones" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=#F4F6F8;align=left;spacingLeft=8;fontColor=#232F3E;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" value="usuario_id" vertex="1">
+          <mxGeometry x="0" y="148" width="240" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-direcciones_r4t" parent="er-operacional-direcciones" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=left;fontColor=#545B64;" value="BIGINT" vertex="1">
+          <mxGeometry x="96" y="148" width="72" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-direcciones_r4b" parent="er-operacional-direcciones" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=right;spacingRight=8;fontColor=#0B6E4F;fontStyle=1;" value="FK" vertex="1">
+          <mxGeometry x="168" y="148" width="72" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-my" parent="er-operacional-1" style="rounded=1;arcSize=3;whiteSpace=wrap;html=1;container=1;collapsible=0;fillColor=#F0F7F9;strokeColor=#00758F;strokeWidth=1.5;dashed=1;dashPattern=8 4;align=left;verticalAlign=top;spacingLeft=14;spacingTop=8;fontSize=12;fontColor=#00758F;" value="&lt;b style='font-size:14px'&gt;MySQL 8.0 · productos_db&lt;/b&gt;&lt;br&gt;&lt;font color='#545B64'&gt;dueño: ms-productos (Python · FastAPI / SQLAlchemy)&lt;/font&gt;" vertex="1">
+          <mxGeometry x="680" y="76" width="640" height="334" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-productos" parent="er-operacional-my" style="swimlane;html=1;startSize=44;horizontal=1;collapsible=0;rounded=1;arcSize=6;fillColor=#00758F;swimlaneFillColor=#FFFFFF;strokeColor=#00758F;strokeWidth=2;fontColor=#FFFFFF;fontSize=13;" value="&lt;b&gt;productos&lt;/b&gt;&lt;br&gt;&lt;span style='font-size:10px;font-weight:normal'&gt;tabla&lt;/span&gt;" vertex="1">
+          <mxGeometry x="50" y="70" width="270" height="226" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-productos_r0" parent="er-operacional-productos" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=#F4F6F8;align=left;spacingLeft=8;fontColor=#232F3E;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontStyle=1;" value="id" vertex="1">
+          <mxGeometry x="0" y="44" width="270" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-productos_r0t" parent="er-operacional-productos" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=left;fontColor=#545B64;" value="INT" vertex="1">
+          <mxGeometry x="108" y="44" width="81" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-productos_r0b" parent="er-operacional-productos" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=right;spacingRight=8;fontColor=#0B6E4F;fontStyle=1;" value="PK" vertex="1">
+          <mxGeometry x="189" y="44" width="81" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-productos_r1" parent="er-operacional-productos" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=#FFFFFF;align=left;spacingLeft=8;fontColor=#232F3E;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" value="nombre" vertex="1">
+          <mxGeometry x="0" y="70" width="270" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-productos_r1t" parent="er-operacional-productos" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=left;fontColor=#545B64;" value="VARCHAR(150)" vertex="1">
+          <mxGeometry x="108" y="70" width="81" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-productos_r2" parent="er-operacional-productos" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=#F4F6F8;align=left;spacingLeft=8;fontColor=#232F3E;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" value="descripcion" vertex="1">
+          <mxGeometry x="0" y="96" width="270" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-productos_r2t" parent="er-operacional-productos" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=left;fontColor=#545B64;" value="VARCHAR(500)" vertex="1">
+          <mxGeometry x="108" y="96" width="81" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-productos_r3" parent="er-operacional-productos" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=#FFFFFF;align=left;spacingLeft=8;fontColor=#232F3E;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" value="precio" vertex="1">
+          <mxGeometry x="0" y="122" width="270" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-productos_r3t" parent="er-operacional-productos" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=left;fontColor=#545B64;" value="FLOAT" vertex="1">
+          <mxGeometry x="108" y="122" width="81" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-productos_r4" parent="er-operacional-productos" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=#F4F6F8;align=left;spacingLeft=8;fontColor=#232F3E;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" value="stock" vertex="1">
+          <mxGeometry x="0" y="148" width="270" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-productos_r4t" parent="er-operacional-productos" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=left;fontColor=#545B64;" value="INT" vertex="1">
+          <mxGeometry x="108" y="148" width="81" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-productos_r5" parent="er-operacional-productos" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=#FFFFFF;align=left;spacingLeft=8;fontColor=#232F3E;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" value="categoria_id" vertex="1">
+          <mxGeometry x="0" y="174" width="270" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-productos_r5t" parent="er-operacional-productos" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=left;fontColor=#545B64;" value="INT" vertex="1">
+          <mxGeometry x="108" y="174" width="81" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-productos_r5b" parent="er-operacional-productos" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=right;spacingRight=8;fontColor=#0B6E4F;fontStyle=1;" value="FK" vertex="1">
+          <mxGeometry x="189" y="174" width="81" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-productos_r6" parent="er-operacional-productos" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=#F4F6F8;align=left;spacingLeft=8;fontColor=#232F3E;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" value="creado_en" vertex="1">
+          <mxGeometry x="0" y="200" width="270" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-productos_r6t" parent="er-operacional-productos" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=left;fontColor=#545B64;" value="DATETIME" vertex="1">
+          <mxGeometry x="108" y="200" width="81" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-categorias" parent="er-operacional-my" style="swimlane;html=1;startSize=44;horizontal=1;collapsible=0;rounded=1;arcSize=6;fillColor=#00758F;swimlaneFillColor=#FFFFFF;strokeColor=#00758F;strokeWidth=2;fontColor=#FFFFFF;fontSize=13;" value="&lt;b&gt;categorias&lt;/b&gt;&lt;br&gt;&lt;span style='font-size:10px;font-weight:normal'&gt;tabla&lt;/span&gt;" vertex="1">
+          <mxGeometry x="390" y="70" width="240" height="96" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-categorias_r0" parent="er-operacional-categorias" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=#F4F6F8;align=left;spacingLeft=8;fontColor=#232F3E;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontStyle=1;" value="id" vertex="1">
+          <mxGeometry x="0" y="44" width="240" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-categorias_r0t" parent="er-operacional-categorias" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=left;fontColor=#545B64;" value="INT" vertex="1">
+          <mxGeometry x="96" y="44" width="72" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-categorias_r0b" parent="er-operacional-categorias" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=right;spacingRight=8;fontColor=#0B6E4F;fontStyle=1;" value="PK" vertex="1">
+          <mxGeometry x="168" y="44" width="72" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-categorias_r1" parent="er-operacional-categorias" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=#FFFFFF;align=left;spacingLeft=8;fontColor=#232F3E;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" value="nombre" vertex="1">
+          <mxGeometry x="0" y="70" width="240" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-categorias_r1t" parent="er-operacional-categorias" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=left;fontColor=#545B64;" value="VARCHAR(100)" vertex="1">
+          <mxGeometry x="96" y="70" width="72" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-categorias_r1b" parent="er-operacional-categorias" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=right;spacingRight=8;fontColor=#0B6E4F;fontStyle=1;" value="UQ" vertex="1">
+          <mxGeometry x="168" y="70" width="72" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-mg" parent="er-operacional-1" style="rounded=1;arcSize=3;whiteSpace=wrap;html=1;container=1;collapsible=0;fillColor=#F3F8F1;strokeColor=#3F8624;strokeWidth=1.5;dashed=1;dashPattern=8 4;align=left;verticalAlign=bottom;spacingLeft=14;spacingBottom=8;fontSize=12;fontColor=#3F8624;" value="&lt;b style='font-size:14px'&gt;MongoDB 7 · pedidos_db · colección pedidos&lt;/b&gt;&lt;br&gt;&lt;font color='#545B64'&gt;dueño: ms-pedidos (Node.js · Express / Mongoose) — base documental: no tiene tablas ni FK&lt;/font&gt;" vertex="1">
+          <mxGeometry x="40" y="450" width="1280" height="360" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-pedidos" parent="er-operacional-mg" style="swimlane;html=1;startSize=44;horizontal=1;collapsible=0;rounded=1;arcSize=6;fillColor=#3F8624;swimlaneFillColor=#FFFFFF;strokeColor=#3F8624;strokeWidth=2;fontColor=#FFFFFF;fontSize=13;" value="&lt;b&gt;pedidos&lt;/b&gt;&lt;br&gt;&lt;span style='font-size:10px;font-weight:normal'&gt;documento&lt;/span&gt;" vertex="1">
+          <mxGeometry x="30" y="30" width="280" height="226" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-pedidos_r0" parent="er-operacional-pedidos" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=#F4F6F8;align=left;spacingLeft=8;fontColor=#232F3E;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontStyle=1;" value="_id" vertex="1">
+          <mxGeometry x="0" y="44" width="280" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-pedidos_r0t" parent="er-operacional-pedidos" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=left;fontColor=#545B64;" value="ObjectId" vertex="1">
+          <mxGeometry x="112" y="44" width="84" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-pedidos_r0b" parent="er-operacional-pedidos" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=right;spacingRight=8;fontColor=#0B6E4F;fontStyle=1;" value="PK" vertex="1">
+          <mxGeometry x="196" y="44" width="84" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-pedidos_r1" parent="er-operacional-pedidos" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=#FFFFFF;align=left;spacingLeft=8;fontColor=#232F3E;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" value="id_usuario" vertex="1">
+          <mxGeometry x="0" y="70" width="280" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-pedidos_r1t" parent="er-operacional-pedidos" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=left;fontColor=#545B64;" value="Number" vertex="1">
+          <mxGeometry x="112" y="70" width="84" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-pedidos_r1b" parent="er-operacional-pedidos" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=right;spacingRight=8;fontColor=#0B6E4F;fontStyle=1;" value="ref" vertex="1">
+          <mxGeometry x="196" y="70" width="84" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-pedidos_r2" parent="er-operacional-pedidos" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=#F4F6F8;align=left;spacingLeft=8;fontColor=#232F3E;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" value="fecha" vertex="1">
+          <mxGeometry x="0" y="96" width="280" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-pedidos_r2t" parent="er-operacional-pedidos" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=left;fontColor=#545B64;" value="Date" vertex="1">
+          <mxGeometry x="112" y="96" width="84" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-pedidos_r3" parent="er-operacional-pedidos" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=#FFFFFF;align=left;spacingLeft=8;fontColor=#232F3E;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" value="items" vertex="1">
+          <mxGeometry x="0" y="122" width="280" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-pedidos_r3t" parent="er-operacional-pedidos" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=left;fontColor=#545B64;" value="Array&amp;lt;item&amp;gt;" vertex="1">
+          <mxGeometry x="112" y="122" width="84" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-pedidos_r3b" parent="er-operacional-pedidos" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=right;spacingRight=8;fontColor=#0B6E4F;fontStyle=1;" value="mín. 1" vertex="1">
+          <mxGeometry x="196" y="122" width="84" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-pedidos_r4" parent="er-operacional-pedidos" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=#F4F6F8;align=left;spacingLeft=8;fontColor=#232F3E;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" value="total" vertex="1">
+          <mxGeometry x="0" y="148" width="280" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-pedidos_r4t" parent="er-operacional-pedidos" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=left;fontColor=#545B64;" value="Number" vertex="1">
+          <mxGeometry x="112" y="148" width="84" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-pedidos_r4b" parent="er-operacional-pedidos" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=right;spacingRight=8;fontColor=#0B6E4F;fontStyle=1;" value="≥ 0" vertex="1">
+          <mxGeometry x="196" y="148" width="84" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-pedidos_r5" parent="er-operacional-pedidos" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=#FFFFFF;align=left;spacingLeft=8;fontColor=#232F3E;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" value="estado" vertex="1">
+          <mxGeometry x="0" y="174" width="280" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-pedidos_r5t" parent="er-operacional-pedidos" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=left;fontColor=#545B64;" value="String" vertex="1">
+          <mxGeometry x="112" y="174" width="84" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-pedidos_r5b" parent="er-operacional-pedidos" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=right;spacingRight=8;fontColor=#0B6E4F;fontStyle=1;" value="enum" vertex="1">
+          <mxGeometry x="196" y="174" width="84" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-pedidos_r6" parent="er-operacional-pedidos" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=#F4F6F8;align=left;spacingLeft=8;fontColor=#232F3E;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" value="__v" vertex="1">
+          <mxGeometry x="0" y="200" width="280" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-pedidos_r6t" parent="er-operacional-pedidos" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=left;fontColor=#545B64;" value="Number" vertex="1">
+          <mxGeometry x="112" y="200" width="84" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-pedidos_r6b" parent="er-operacional-pedidos" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=right;spacingRight=8;fontColor=#0B6E4F;fontStyle=1;" value="versión" vertex="1">
+          <mxGeometry x="196" y="200" width="84" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-items" parent="er-operacional-mg" style="swimlane;html=1;startSize=44;horizontal=1;collapsible=0;rounded=1;arcSize=6;fillColor=#6BA35A;swimlaneFillColor=#FFFFFF;strokeColor=#3F8624;strokeWidth=2;fontColor=#FFFFFF;fontSize=13;" value="&lt;b&gt;item&lt;/b&gt;&lt;br&gt;&lt;span style='font-size:10px;font-weight:normal'&gt;subdocumento embebido en pedidos.items&lt;/span&gt;" vertex="1">
+          <mxGeometry x="690" y="143" width="270" height="122" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-items_r0" parent="er-operacional-items" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=#F4F6F8;align=left;spacingLeft=8;fontColor=#232F3E;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" value="id_producto" vertex="1">
+          <mxGeometry x="0" y="44" width="270" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-items_r0t" parent="er-operacional-items" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=left;fontColor=#545B64;" value="Number" vertex="1">
+          <mxGeometry x="108" y="44" width="81" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-items_r0b" parent="er-operacional-items" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=right;spacingRight=8;fontColor=#0B6E4F;fontStyle=1;" value="ref" vertex="1">
+          <mxGeometry x="189" y="44" width="81" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-items_r1" parent="er-operacional-items" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=#FFFFFF;align=left;spacingLeft=8;fontColor=#232F3E;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" value="cantidad" vertex="1">
+          <mxGeometry x="0" y="70" width="270" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-items_r1t" parent="er-operacional-items" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=left;fontColor=#545B64;" value="Number" vertex="1">
+          <mxGeometry x="108" y="70" width="81" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-items_r1b" parent="er-operacional-items" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=right;spacingRight=8;fontColor=#0B6E4F;fontStyle=1;" value="≥ 1" vertex="1">
+          <mxGeometry x="189" y="70" width="81" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-items_r2" parent="er-operacional-items" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=#F4F6F8;align=left;spacingLeft=8;fontColor=#232F3E;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" value="precio_unitario" vertex="1">
+          <mxGeometry x="0" y="96" width="270" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-items_r2t" parent="er-operacional-items" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=left;fontColor=#545B64;" value="Number" vertex="1">
+          <mxGeometry x="108" y="96" width="81" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-items_r2b" parent="er-operacional-items" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=right;spacingRight=8;fontColor=#0B6E4F;fontStyle=1;" value="≥ 0" vertex="1">
+          <mxGeometry x="189" y="96" width="81" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-json" parent="er-operacional-mg" style="rounded=1;arcSize=4;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#B7C9B0;align=left;verticalAlign=top;spacing=10;fontFamily=Courier New;fontSize=11;fontColor=#232F3E;" value="//&amp;nbsp;ejemplo&amp;nbsp;de&amp;nbsp;documento&lt;br&gt;{&lt;br&gt;&amp;nbsp;&amp;nbsp;&quot;_id&quot;:&amp;nbsp;&quot;66f1c2a9…&quot;,&lt;br&gt;&amp;nbsp;&amp;nbsp;&quot;id_usuario&quot;:&amp;nbsp;1532,&lt;br&gt;&amp;nbsp;&amp;nbsp;&quot;fecha&quot;:&amp;nbsp;&quot;2026-09-10T14:22:05Z&quot;,&lt;br&gt;&amp;nbsp;&amp;nbsp;&quot;items&quot;:&amp;nbsp;[&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;{&amp;nbsp;&quot;id_producto&quot;:&amp;nbsp;87,&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&quot;cantidad&quot;:&amp;nbsp;2,&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&quot;precio_unitario&quot;:&amp;nbsp;49.9&amp;nbsp;}&lt;br&gt;&amp;nbsp;&amp;nbsp;],&lt;br&gt;&amp;nbsp;&amp;nbsp;&quot;total&quot;:&amp;nbsp;99.8,&lt;br&gt;&amp;nbsp;&amp;nbsp;&quot;estado&quot;:&amp;nbsp;&quot;pagado&quot;,&lt;br&gt;&amp;nbsp;&amp;nbsp;&quot;__v&quot;:&amp;nbsp;0&lt;br&gt;}&lt;br&gt;//&amp;nbsp;estado:&amp;nbsp;pendiente&amp;nbsp;|&amp;nbsp;pagado&amp;nbsp;|&lt;br&gt;//&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;enviado&amp;nbsp;|&amp;nbsp;cancelado" vertex="1">
+          <mxGeometry x="1000" y="30" width="256" height="270" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-leg1" parent="er-operacional-1" style="rounded=1;arcSize=4;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#AAB7B8;align=left;verticalAlign=top;spacingLeft=12;spacingTop=6;fontSize=12;fontColor=#232F3E;" value="&lt;b&gt;Cómo leerlo&lt;/b&gt;" vertex="1">
+          <mxGeometry x="40" y="840" width="1280" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-lg_fk_t" parent="er-operacional-1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=11;fontColor=#232F3E;" value="FK real dentro de la misma base: &lt;b&gt;muchos&lt;/b&gt; (pata de gallo) a &lt;b&gt;uno&lt;/b&gt; (raya)" vertex="1">
+          <mxGeometry x="162" y="873" width="470" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-lg_ref_t" parent="er-operacional-1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=11;fontColor=#232F3E;" value="Referencia lógica entre bases distintas: no hay FK; ms-pedidos la valida llamando por REST a ms-usuarios y ms-productos antes de guardar" vertex="1">
+          <mxGeometry x="162" y="904" width="470" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-lg_badges" parent="er-operacional-1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=11;fontColor=#232F3E;" value="&lt;b&gt;PK&lt;/b&gt; clave primaria · &lt;b&gt;FK&lt;/b&gt; clave foránea · &lt;b&gt;UQ&lt;/b&gt; valor único · &lt;b&gt;ref&lt;/b&gt; referencia lógica&lt;br&gt;&lt;b&gt;item&lt;/b&gt; no es otra colección: es un arreglo guardado &lt;i&gt;dentro&lt;/i&gt; de cada pedido (por eso se consulta con UNNEST en Athena)&lt;br&gt;Relaciones: 1 usuario → 0..N direcciones · 1 categoría → N productos · 1 pedido → 1..N items" vertex="1">
+          <mxGeometry x="680" y="866" width="620" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-e_dir_usr" parent="er-operacional-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;startArrow=ERzeroToMany;endArrow=ERmandOne;startFill=0;endFill=0;strokeColor=#336791;strokeWidth=1.5;fontSize=11;fontColor=#232F3E;labelBackgroundColor=#FFFFFF;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" value="" edge="1" source="er-operacional-direcciones_r4" target="er-operacional-usuarios_r0">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="370" y="307" />
+              <mxPoint x="370" y="203" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="er-operacional-e_prod_cat" parent="er-operacional-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;startArrow=ERmany;endArrow=ERmandOne;startFill=0;endFill=0;strokeColor=#00758F;strokeWidth=1.5;fontSize=11;fontColor=#232F3E;labelBackgroundColor=#FFFFFF;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" value="" edge="1" source="er-operacional-productos_r5" target="er-operacional-categorias_r0">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1035" y="333" />
+              <mxPoint x="1035" y="203" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="er-operacional-e_ped_items" parent="er-operacional-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;startArrow=ERmandOne;endArrow=ERoneToMany;startFill=0;endFill=0;strokeColor=#3F8624;strokeWidth=2;fontSize=11;fontColor=#232F3E;labelBackgroundColor=#FFFFFF;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.180328;entryDx=0;entryDy=0;" value="embebido (1..N)" edge="1" source="er-operacional-pedidos_r3" target="er-operacional-items">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-e_ped_usr" parent="er-operacional-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;startArrow=ERzeroToMany;endArrow=ERmandOne;startFill=0;endFill=0;strokeColor=#7D8998;strokeWidth=1.5;fontSize=11;fontColor=#232F3E;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=6 4;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" value="pedidos.id_usuario → usuarios.id" edge="1" source="er-operacional-pedidos" target="er-operacional-usuarios">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-e_item_prod" parent="er-operacional-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;startArrow=ERzeroToMany;endArrow=ERmandOne;startFill=0;endFill=0;strokeColor=#7D8998;strokeWidth=1.5;fontSize=11;fontColor=#232F3E;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=6 4;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" value="item.id_producto → productos.id" edge="1" source="er-operacional-items" target="er-operacional-productos">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="er-operacional-lg_fk" parent="er-operacional-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;startArrow=ERmany;endArrow=ERmandOne;startFill=0;endFill=0;strokeColor=#232F3E;strokeWidth=1.5;fontSize=11;fontColor=#232F3E;labelBackgroundColor=#FFFFFF;" value="" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="60" y="885" as="sourcePoint" />
+            <mxPoint x="150" y="885" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="er-operacional-lg_ref" parent="er-operacional-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;startArrow=ERzeroToMany;endArrow=ERmandOne;startFill=0;endFill=0;strokeColor=#7D8998;strokeWidth=1.5;fontSize=11;fontColor=#232F3E;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=6 4;" value="" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="60" y="922" as="sourcePoint" />
+            <mxPoint x="150" y="922" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram name="E-R · Catálogo Glue" id="er-glue">
+    <mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1560" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="er-glue-0" />
+        <mxCell id="er-glue-1" parent="er-glue-0" />
+        <mxCell id="er-glue-t2" parent="er-glue-1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=18;fontColor=#232F3E;" value="&lt;b&gt;CloudCommerce — Diagrama E/R del catálogo de datos (AWS Glue)&lt;/b&gt;" vertex="1">
+          <mxGeometry x="40" y="14" width="1480" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-t2s" parent="er-glue-1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=12;fontColor=#545B64;" value="Base &lt;b&gt;cloudcommerce_datalake&lt;/b&gt; · 3 tablas creadas por el crawler sobre &lt;b&gt;s3://cloudcommerce-datalake&lt;/b&gt; · consultadas con Athena" vertex="1">
+          <mxGeometry x="40" y="46" width="1480" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-g_usuarios" parent="er-glue-1" style="swimlane;html=1;startSize=44;horizontal=1;collapsible=0;rounded=1;arcSize=6;fillColor=#8C4FFF;swimlaneFillColor=#FFFFFF;strokeColor=#8C4FFF;strokeWidth=2;fontColor=#FFFFFF;fontSize=13;" value="&lt;b&gt;usuarios&lt;/b&gt;&lt;br&gt;&lt;span style='font-size:10px;font-weight:normal'&gt;s3 …/usuarios/ · CSV&lt;/span&gt;" vertex="1">
+          <mxGeometry x="40" y="100" width="280" height="226" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-g_usuarios_r0" parent="er-glue-g_usuarios" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=#F4F6F8;align=left;spacingLeft=8;fontColor=#232F3E;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontStyle=1;" value="id" vertex="1">
+          <mxGeometry x="0" y="44" width="280" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-g_usuarios_r0t" parent="er-glue-g_usuarios" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=left;fontColor=#545B64;" value="bigint" vertex="1">
+          <mxGeometry x="112" y="44" width="84" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-g_usuarios_r0b" parent="er-glue-g_usuarios" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=right;spacingRight=8;fontColor=#0B6E4F;fontStyle=1;" value="clave ⚠" vertex="1">
+          <mxGeometry x="196" y="44" width="84" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-g_usuarios_r1" parent="er-glue-g_usuarios" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=#FFFFFF;align=left;spacingLeft=8;fontColor=#232F3E;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" value="nombre" vertex="1">
+          <mxGeometry x="0" y="70" width="280" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-g_usuarios_r1t" parent="er-glue-g_usuarios" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=left;fontColor=#545B64;" value="string" vertex="1">
+          <mxGeometry x="112" y="70" width="84" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-g_usuarios_r2" parent="er-glue-g_usuarios" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=#F4F6F8;align=left;spacingLeft=8;fontColor=#232F3E;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" value="email" vertex="1">
+          <mxGeometry x="0" y="96" width="280" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-g_usuarios_r2t" parent="er-glue-g_usuarios" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=left;fontColor=#545B64;" value="string" vertex="1">
+          <mxGeometry x="112" y="96" width="84" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-g_usuarios_r3" parent="er-glue-g_usuarios" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=#FFFFFF;align=left;spacingLeft=8;fontColor=#232F3E;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" value="fecha_registro" vertex="1">
+          <mxGeometry x="0" y="122" width="280" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-g_usuarios_r3t" parent="er-glue-g_usuarios" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=left;fontColor=#545B64;" value="string" vertex="1">
+          <mxGeometry x="112" y="122" width="84" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-g_usuarios_r4" parent="er-glue-g_usuarios" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=#F4F6F8;align=left;spacingLeft=8;fontColor=#232F3E;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" value="calle" vertex="1">
+          <mxGeometry x="0" y="148" width="280" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-g_usuarios_r4t" parent="er-glue-g_usuarios" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=left;fontColor=#545B64;" value="string" vertex="1">
+          <mxGeometry x="112" y="148" width="84" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-g_usuarios_r5" parent="er-glue-g_usuarios" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=#FFFFFF;align=left;spacingLeft=8;fontColor=#232F3E;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" value="ciudad" vertex="1">
+          <mxGeometry x="0" y="174" width="280" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-g_usuarios_r5t" parent="er-glue-g_usuarios" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=left;fontColor=#545B64;" value="string" vertex="1">
+          <mxGeometry x="112" y="174" width="84" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-g_usuarios_r6" parent="er-glue-g_usuarios" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=#F4F6F8;align=left;spacingLeft=8;fontColor=#232F3E;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" value="pais" vertex="1">
+          <mxGeometry x="0" y="200" width="280" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-g_usuarios_r6t" parent="er-glue-g_usuarios" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=left;fontColor=#545B64;" value="string" vertex="1">
+          <mxGeometry x="112" y="200" width="84" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-g_pedidos" parent="er-glue-1" style="swimlane;html=1;startSize=44;horizontal=1;collapsible=0;rounded=1;arcSize=6;fillColor=#8C4FFF;swimlaneFillColor=#FFFFFF;strokeColor=#8C4FFF;strokeWidth=2;fontColor=#FFFFFF;fontSize=13;" value="&lt;b&gt;pedidos&lt;/b&gt;&lt;br&gt;&lt;span style='font-size:10px;font-weight:normal'&gt;s3 …/pedidos/ · JSON Lines&lt;/span&gt;" vertex="1">
+          <mxGeometry x="480" y="100" width="300" height="226" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-g_pedidos_r0" parent="er-glue-g_pedidos" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=#F4F6F8;align=left;spacingLeft=8;fontColor=#232F3E;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontStyle=1;" value="_id" vertex="1">
+          <mxGeometry x="0" y="44" width="300" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-g_pedidos_r0t" parent="er-glue-g_pedidos" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=left;fontColor=#545B64;" value="string" vertex="1">
+          <mxGeometry x="120" y="44" width="90" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-g_pedidos_r0b" parent="er-glue-g_pedidos" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=right;spacingRight=8;fontColor=#0B6E4F;fontStyle=1;" value="clave" vertex="1">
+          <mxGeometry x="210" y="44" width="90" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-g_pedidos_r1" parent="er-glue-g_pedidos" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=#FFFFFF;align=left;spacingLeft=8;fontColor=#232F3E;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" value="id_usuario" vertex="1">
+          <mxGeometry x="0" y="70" width="300" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-g_pedidos_r1t" parent="er-glue-g_pedidos" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=left;fontColor=#545B64;" value="int" vertex="1">
+          <mxGeometry x="120" y="70" width="90" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-g_pedidos_r1b" parent="er-glue-g_pedidos" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=right;spacingRight=8;fontColor=#0B6E4F;fontStyle=1;" value="→ usuarios" vertex="1">
+          <mxGeometry x="210" y="70" width="90" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-g_pedidos_r2" parent="er-glue-g_pedidos" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=#F4F6F8;align=left;spacingLeft=8;fontColor=#232F3E;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" value="fecha" vertex="1">
+          <mxGeometry x="0" y="96" width="300" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-g_pedidos_r2t" parent="er-glue-g_pedidos" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=left;fontColor=#545B64;" value="string" vertex="1">
+          <mxGeometry x="120" y="96" width="90" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-g_pedidos_r2b" parent="er-glue-g_pedidos" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=right;spacingRight=8;fontColor=#0B6E4F;fontStyle=1;" value="ISO 8601" vertex="1">
+          <mxGeometry x="210" y="96" width="90" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-g_pedidos_r3" parent="er-glue-g_pedidos" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=#FFFFFF;align=left;spacingLeft=8;fontColor=#232F3E;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" value="items" vertex="1">
+          <mxGeometry x="0" y="122" width="300" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-g_pedidos_r3t" parent="er-glue-g_pedidos" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=left;fontColor=#545B64;" value="array&amp;lt;struct&amp;gt;" vertex="1">
+          <mxGeometry x="120" y="122" width="90" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-g_pedidos_r3b" parent="er-glue-g_pedidos" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=right;spacingRight=8;fontColor=#0B6E4F;fontStyle=1;" value="↓ anidado" vertex="1">
+          <mxGeometry x="210" y="122" width="90" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-g_pedidos_r4" parent="er-glue-g_pedidos" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=#F4F6F8;align=left;spacingLeft=8;fontColor=#232F3E;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" value="total" vertex="1">
+          <mxGeometry x="0" y="148" width="300" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-g_pedidos_r4t" parent="er-glue-g_pedidos" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=left;fontColor=#545B64;" value="double" vertex="1">
+          <mxGeometry x="120" y="148" width="90" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-g_pedidos_r5" parent="er-glue-g_pedidos" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=#FFFFFF;align=left;spacingLeft=8;fontColor=#232F3E;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" value="estado" vertex="1">
+          <mxGeometry x="0" y="174" width="300" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-g_pedidos_r5t" parent="er-glue-g_pedidos" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=left;fontColor=#545B64;" value="string" vertex="1">
+          <mxGeometry x="120" y="174" width="90" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-g_pedidos_r6" parent="er-glue-g_pedidos" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=#F4F6F8;align=left;spacingLeft=8;fontColor=#232F3E;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" value="__v" vertex="1">
+          <mxGeometry x="0" y="200" width="300" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-g_pedidos_r6t" parent="er-glue-g_pedidos" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=left;fontColor=#545B64;" value="int" vertex="1">
+          <mxGeometry x="120" y="200" width="90" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-g_pedidos_r6b" parent="er-glue-g_pedidos" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=right;spacingRight=8;fontColor=#0B6E4F;fontStyle=1;" value="Mongoose" vertex="1">
+          <mxGeometry x="210" y="200" width="90" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-g_items" parent="er-glue-1" style="swimlane;html=1;startSize=44;horizontal=1;collapsible=0;rounded=1;arcSize=6;fillColor=#B18CFF;swimlaneFillColor=#FFFFFF;strokeColor=#8C4FFF;strokeWidth=2;fontColor=#FFFFFF;fontSize=13;" value="&lt;b&gt;items&lt;/b&gt;&lt;br&gt;&lt;span style='font-size:10px;font-weight:normal'&gt;struct anidado dentro de pedidos.items&lt;/span&gt;" vertex="1">
+          <mxGeometry x="480" y="370" width="300" height="122" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-g_items_r0" parent="er-glue-g_items" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=#F4F6F8;align=left;spacingLeft=8;fontColor=#232F3E;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" value="id_producto" vertex="1">
+          <mxGeometry x="0" y="44" width="300" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-g_items_r0t" parent="er-glue-g_items" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=left;fontColor=#545B64;" value="bigint" vertex="1">
+          <mxGeometry x="120" y="44" width="90" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-g_items_r0b" parent="er-glue-g_items" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=right;spacingRight=8;fontColor=#0B6E4F;fontStyle=1;" value="→ productos" vertex="1">
+          <mxGeometry x="210" y="44" width="90" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-g_items_r1" parent="er-glue-g_items" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=#FFFFFF;align=left;spacingLeft=8;fontColor=#232F3E;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" value="cantidad" vertex="1">
+          <mxGeometry x="0" y="70" width="300" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-g_items_r1t" parent="er-glue-g_items" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=left;fontColor=#545B64;" value="int" vertex="1">
+          <mxGeometry x="120" y="70" width="90" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-g_items_r2" parent="er-glue-g_items" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=#F4F6F8;align=left;spacingLeft=8;fontColor=#232F3E;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" value="precio_unitario" vertex="1">
+          <mxGeometry x="0" y="96" width="300" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-g_items_r2t" parent="er-glue-g_items" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=left;fontColor=#545B64;" value="double" vertex="1">
+          <mxGeometry x="120" y="96" width="90" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-g_productos" parent="er-glue-1" style="swimlane;html=1;startSize=44;horizontal=1;collapsible=0;rounded=1;arcSize=6;fillColor=#8C4FFF;swimlaneFillColor=#FFFFFF;strokeColor=#8C4FFF;strokeWidth=2;fontColor=#FFFFFF;fontSize=13;" value="&lt;b&gt;productos&lt;/b&gt;&lt;br&gt;&lt;span style='font-size:10px;font-weight:normal'&gt;s3 …/productos/ · CSV&lt;/span&gt;" vertex="1">
+          <mxGeometry x="940" y="100" width="300" height="252" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-g_productos_r0" parent="er-glue-g_productos" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=#F4F6F8;align=left;spacingLeft=8;fontColor=#232F3E;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontStyle=1;" value="id" vertex="1">
+          <mxGeometry x="0" y="44" width="300" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-g_productos_r0t" parent="er-glue-g_productos" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=left;fontColor=#545B64;" value="bigint" vertex="1">
+          <mxGeometry x="120" y="44" width="90" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-g_productos_r0b" parent="er-glue-g_productos" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=right;spacingRight=8;fontColor=#0B6E4F;fontStyle=1;" value="clave" vertex="1">
+          <mxGeometry x="210" y="44" width="90" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-g_productos_r1" parent="er-glue-g_productos" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=#FFFFFF;align=left;spacingLeft=8;fontColor=#232F3E;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" value="nombre" vertex="1">
+          <mxGeometry x="0" y="70" width="300" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-g_productos_r1t" parent="er-glue-g_productos" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=left;fontColor=#545B64;" value="string" vertex="1">
+          <mxGeometry x="120" y="70" width="90" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-g_productos_r2" parent="er-glue-g_productos" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=#F4F6F8;align=left;spacingLeft=8;fontColor=#232F3E;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" value="descripcion" vertex="1">
+          <mxGeometry x="0" y="96" width="300" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-g_productos_r2t" parent="er-glue-g_productos" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=left;fontColor=#545B64;" value="string" vertex="1">
+          <mxGeometry x="120" y="96" width="90" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-g_productos_r3" parent="er-glue-g_productos" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=#FFFFFF;align=left;spacingLeft=8;fontColor=#232F3E;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" value="precio" vertex="1">
+          <mxGeometry x="0" y="122" width="300" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-g_productos_r3t" parent="er-glue-g_productos" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=left;fontColor=#545B64;" value="double" vertex="1">
+          <mxGeometry x="120" y="122" width="90" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-g_productos_r4" parent="er-glue-g_productos" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=#F4F6F8;align=left;spacingLeft=8;fontColor=#232F3E;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" value="stock" vertex="1">
+          <mxGeometry x="0" y="148" width="300" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-g_productos_r4t" parent="er-glue-g_productos" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=left;fontColor=#545B64;" value="bigint" vertex="1">
+          <mxGeometry x="120" y="148" width="90" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-g_productos_r5" parent="er-glue-g_productos" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=#FFFFFF;align=left;spacingLeft=8;fontColor=#232F3E;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" value="categoria_id" vertex="1">
+          <mxGeometry x="0" y="174" width="300" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-g_productos_r5t" parent="er-glue-g_productos" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=left;fontColor=#545B64;" value="bigint" vertex="1">
+          <mxGeometry x="120" y="174" width="90" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-g_productos_r6" parent="er-glue-g_productos" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=#F4F6F8;align=left;spacingLeft=8;fontColor=#232F3E;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" value="categoria_nombre" vertex="1">
+          <mxGeometry x="0" y="200" width="300" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-g_productos_r6t" parent="er-glue-g_productos" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=left;fontColor=#545B64;" value="string" vertex="1">
+          <mxGeometry x="120" y="200" width="90" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-g_productos_r7" parent="er-glue-g_productos" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=#FFFFFF;align=left;spacingLeft=8;fontColor=#232F3E;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" value="creado_en" vertex="1">
+          <mxGeometry x="0" y="226" width="300" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-g_productos_r7t" parent="er-glue-g_productos" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=none;align=left;fontColor=#545B64;" value="string" vertex="1">
+          <mxGeometry x="120" y="226" width="90" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-v_ped" parent="er-glue-1" style="swimlane;html=1;startSize=44;horizontal=1;collapsible=0;rounded=1;arcSize=6;fillColor=#EFE7FF;swimlaneFillColor=#FFFFFF;strokeColor=#8C4FFF;strokeWidth=1.5;fontColor=#8C4FFF;fontSize=13;dashed=1;dashPattern=6 3;" value="&lt;b&gt;v_pedidos_actuales&lt;/b&gt;&lt;br&gt;&lt;span style='font-size:10px;font-weight:normal'&gt;vista Athena · último snapshot de pedidos&lt;/span&gt;" vertex="1">
+          <mxGeometry x="480" y="560" width="300" height="96" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-v_ped_r0" parent="er-glue-v_ped" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=#F4F6F8;align=left;spacingLeft=8;fontColor=#232F3E;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" value="_id · id_usuario · fecha" vertex="1">
+          <mxGeometry x="0" y="44" width="300" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-v_ped_r1" parent="er-glue-v_ped" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=#FFFFFF;align=left;spacingLeft=8;fontColor=#232F3E;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" value="items · total · estado" vertex="1">
+          <mxGeometry x="0" y="70" width="300" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-v_prod" parent="er-glue-1" style="swimlane;html=1;startSize=44;horizontal=1;collapsible=0;rounded=1;arcSize=6;fillColor=#EFE7FF;swimlaneFillColor=#FFFFFF;strokeColor=#8C4FFF;strokeWidth=1.5;fontColor=#8C4FFF;fontSize=13;dashed=1;dashPattern=6 3;" value="&lt;b&gt;v_productos_actuales&lt;/b&gt;&lt;br&gt;&lt;span style='font-size:10px;font-weight:normal'&gt;vista Athena · último snapshot de productos&lt;/span&gt;" vertex="1">
+          <mxGeometry x="940" y="560" width="300" height="96" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-v_prod_r0" parent="er-glue-v_prod" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=#F4F6F8;align=left;spacingLeft=8;fontColor=#232F3E;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" value="id · nombre · precio · stock" vertex="1">
+          <mxGeometry x="0" y="44" width="300" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-v_prod_r1" parent="er-glue-v_prod" style="text;html=1;whiteSpace=wrap;strokeColor=none;verticalAlign=middle;fontSize=11;fillColor=#FFFFFF;align=left;spacingLeft=8;fontColor=#232F3E;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" value="categoria_id · categoria_nombre" vertex="1">
+          <mxGeometry x="0" y="70" width="300" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-n_usr" parent="er-glue-1" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#FFF8E1;strokeColor=#8C6D00;strokeWidth=1;align=left;verticalAlign=top;spacing=8;fontSize=11;fontColor=#232F3E;" value="&lt;b&gt;⚠ Grano: 1 fila por (usuario, dirección)&lt;/b&gt;&lt;br&gt;La ingesta hace LEFT JOIN usuarios–direcciones, así que &lt;b&gt;id&lt;/b&gt; se repite si un usuario tiene varias direcciones. Las consultas primero deduplican (CTE &lt;i&gt;usuarios_unicos&lt;/i&gt;, GROUP BY id)." vertex="1">
+          <mxGeometry x="40" y="350" width="280" height="105" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-n_prod" parent="er-glue-1" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#FFF8E1;strokeColor=#8C6D00;strokeWidth=1;align=left;verticalAlign=top;spacing=8;fontSize=11;fontColor=#232F3E;" value="&lt;b&gt;categorias va desnormalizada&lt;/b&gt;&lt;br&gt;La ingesta de productos hace JOIN con categorias y guarda &lt;b&gt;categoria_nombre&lt;/b&gt; en cada fila. Por eso el catálogo no necesita una tabla categorias." vertex="1">
+          <mxGeometry x="1280" y="100" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-n_dir" parent="er-glue-1" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#FFF8E1;strokeColor=#8C6D00;strokeWidth=1;align=left;verticalAlign=top;spacing=8;fontSize=11;fontColor=#232F3E;" value="&lt;b&gt;direcciones&lt;/b&gt; también va aplanada: calle, ciudad y país vienen como columnas de usuarios." vertex="1">
+          <mxGeometry x="1280" y="220" width="240" height="65" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-n_views" parent="er-glue-1" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#F6F1FF;strokeColor=#8C4FFF;strokeWidth=1;align=left;verticalAlign=top;spacing=8;fontSize=11;fontColor=#232F3E;" value="&lt;b&gt;Vistas ≠ tablas.&lt;/b&gt; Cada ingesta agrega un archivo nuevo en S3; las vistas leen solo el último: WHERE &quot;$path&quot; = MAX(&quot;$path&quot;)." vertex="1">
+          <mxGeometry x="1280" y="560" width="240" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-leg2" parent="er-glue-1" style="rounded=1;arcSize=4;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#AAB7B8;align=left;verticalAlign=top;spacingLeft=12;spacingTop=6;fontSize=12;fontColor=#232F3E;" value="&lt;b&gt;Cómo leerlo&lt;/b&gt;" vertex="1">
+          <mxGeometry x="40" y="730" width="1480" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-lg2_j_t" parent="er-glue-1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=11;fontColor=#232F3E;" value="Relación de join: la columna por la que se unen las tablas en las consultas de Athena" vertex="1">
+          <mxGeometry x="162" y="763" width="560" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-lg2_v_t" parent="er-glue-1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=11;fontColor=#232F3E;" value="Vista de Athena construida a partir de una tabla" vertex="1">
+          <mxGeometry x="162" y="798" width="560" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-lg2_k" parent="er-glue-1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=11;fontColor=#232F3E;" value="&lt;b&gt;Claves lógicas:&lt;/b&gt; Glue y Athena no hacen cumplir PK ni FK. &quot;clave&quot; y &quot;→ tabla&quot; marcan las columnas que se usan como identificador y para los JOIN de las 4 consultas (pedidos ⋈ productos vía UNNEST(items), pedidos ⋈ usuarios, y las tres juntas)." vertex="1">
+          <mxGeometry x="760" y="752" width="740" height="76" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-g_e_usr" parent="er-glue-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;startArrow=ERmandOne;endArrow=ERzeroToMany;startFill=0;endFill=0;strokeColor=#8C4FFF;strokeWidth=1.5;fontSize=11;fontColor=#232F3E;labelBackgroundColor=#FFFFFF;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" value="id_usuario" edge="1" source="er-glue-g_usuarios_r0" target="er-glue-g_pedidos_r1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="400" y="157" />
+              <mxPoint x="400" y="183" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="er-glue-g_e_items" parent="er-glue-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;startArrow=ERmandOne;endArrow=ERoneToMany;startFill=0;endFill=0;strokeColor=#8C4FFF;strokeWidth=2;fontSize=11;fontColor=#232F3E;labelBackgroundColor=#FFFFFF;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" value="1..N · UNNEST(items)" edge="1" source="er-glue-g_pedidos" target="er-glue-g_items">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-g_e_prod" parent="er-glue-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;startArrow=ERmany;endArrow=ERmandOne;startFill=0;endFill=0;strokeColor=#8C4FFF;strokeWidth=1.5;fontSize=11;fontColor=#232F3E;labelBackgroundColor=#FFFFFF;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" value="id_producto" edge="1" source="er-glue-g_items_r0" target="er-glue-g_productos_r0">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="860" y="427" />
+              <mxPoint x="860" y="157" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="er-glue-g_e_vped" parent="er-glue-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;startArrow=none;endArrow=block;startFill=0;endFill=0;strokeColor=#7D8998;strokeWidth=1.5;fontSize=11;fontColor=#232F3E;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=6 4;exitX=0;exitY=0.85;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" value="" edge="1" source="er-glue-g_pedidos" target="er-glue-v_ped">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="450" y="292" />
+              <mxPoint x="450" y="608" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="er-glue-g_e_vprod" parent="er-glue-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;startArrow=none;endArrow=block;startFill=0;endFill=0;strokeColor=#7D8998;strokeWidth=1.5;fontSize=11;fontColor=#232F3E;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=6 4;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" value="" edge="1" source="er-glue-g_productos" target="er-glue-v_prod">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="er-glue-lg2_j" parent="er-glue-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;startArrow=ERmany;endArrow=ERmandOne;startFill=0;endFill=0;strokeColor=#8C4FFF;strokeWidth=1.5;fontSize=11;fontColor=#232F3E;labelBackgroundColor=#FFFFFF;" value="" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="60" y="775" as="sourcePoint" />
+            <mxPoint x="150" y="775" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="er-glue-lg2_v" parent="er-glue-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;startArrow=none;endArrow=block;startFill=0;endFill=0;strokeColor=#7D8998;strokeWidth=1.5;fontSize=11;fontColor=#232F3E;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=6 4;" value="" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="60" y="810" as="sourcePoint" />
+            <mxPoint x="150" y="810" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

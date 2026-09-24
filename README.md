@@ -78,7 +78,7 @@ Data Science: MV Ingesta (3 contenedores docker en Python, pull 100%) → Bucket
 - ✅ `ingesta-productos`, `ingesta-usuarios` e `ingesta-pedidos` (Python → S3) — los 3 contenedores requeridos, corriendo en su propia **MV Ingesta**, bucket `cloudcommerce-datalake`
 - ✅ **Arquitectura final con redundancia real**: los 5 microservicios corren completos en **ambas** MV de producción (no repartidos), apuntando a la misma 3ra MV privada de bases de datos; cada uno de los 5 Target Groups del balanceador tiene 2 targets sanos (uno por VM); las llamadas internas entre microservicios también pasan por el balanceador (no por IP fija). Failover probado en vivo: al apagar una copia de `ms-productos`, el sitio siguió funcionando desde la otra — ver [DEPLOYMENT.md, Partes E y F](DEPLOYMENT.md)
 - ✅ AWS Glue (catálogo `cloudcommerce_datalake`, 3 tablas) + mínimo 4 consultas SQL con join + 2 vistas en Athena — evidencia en el informe
-- ⏳ Diagrama de Arquitectura de Solución en draw.io (actualizar `ms-analitica` de pendiente a desplegado), informe y presentación finales — en curso
+- ✅ Diagrama de Arquitectura de Solución y diagramas E/R en draw.io ([docs/diagrama-arquitectura/](docs/diagrama-arquitectura/)), informe final ([docs/informe/](docs/informe/)) y presentación ([Canva](https://canva.link/3yddmf71wzvmqpe))
 
 ### Cómo correrlo (AWS + local)
 

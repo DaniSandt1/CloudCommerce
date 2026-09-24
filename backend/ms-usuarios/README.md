@@ -28,6 +28,6 @@ Se ejecuta automáticamente al arrancar la aplicación (`DataSeeder`), controlad
 
 ## Pendiente (para la entrega final)
 
-- [ ] Diagrama Entidad/Relación
+- [x] Diagrama Entidad/Relación — [er_ecommerce.drawio](../../docs/diagrama-arquitectura/er_ecommerce.drawio)
 - [ ] Despliegue en MV de producción + AWS API Gateway
 - [ ] Repositorio público en GitHub (enlace aquí)

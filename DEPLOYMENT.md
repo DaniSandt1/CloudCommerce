@@ -1011,6 +1011,6 @@ Pasa cuando `AMPLIFY_MONOREPO_APP_ROOT` está seteado (modo Monorepo activado) p
 - [x] MV "ingesta" dedicada para los contenedores de ingesta — los 3 (`ingesta-productos`, `ingesta-usuarios`, `ingesta-pedidos`)
 - [x] AWS Glue (catálogo de datos, base `cloudcommerce_datalake`) + diagrama E/R del catálogo — evidencia en el informe
 - [x] Mínimo 4 consultas SQL + 2 vistas en Athena — evidencia en el informe
-- [ ] Diagrama de Arquitectura de Solución en draw.io — actualizar `ms-analitica` de "pendiente" a desplegado, y reflejar que ambas MV corren los 5 microservicios (redundancia, no reparto)
+- [x] Diagrama de Arquitectura de Solución en draw.io — [arquitectura.drawio](docs/diagrama-arquitectura/arquitectura.drawio), con ambas MV corriendo los 5 microservicios (redundancia), y diagramas E/R en [er_ecommerce.drawio](docs/diagrama-arquitectura/er_ecommerce.drawio)
 - [x] Documentación Swagger-UI — 5/5 APIs (`ms-productos` `/docs`, `ms-usuarios` `/swagger-ui.html`, `ms-pedidos` `/docs`, `ms-checkout` `/docs`, `ms-analitica` `/docs`)
-- [ ] Informe y presentación finales — informe en redacción, capturas de AWS en curso
+- [x] Informe y presentación finales — informe en [docs/informe/](docs/informe/), presentación en [Canva](https://canva.link/3yddmf71wzvmqpe)

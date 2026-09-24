@@ -39,7 +39,7 @@ python -m app.seed          # o: docker compose exec ms-productos python -m app.
 
 ## Pendiente (para la entrega final)
 
-- [ ] Diagrama Entidad/Relación
+- [x] Diagrama Entidad/Relación — [er_ecommerce.drawio](../../docs/diagrama-arquitectura/er_ecommerce.drawio)
 - [ ] Consumo desde este microservicio hacia otro (o que otro lo consuma a él, p.ej. ms-pedidos)
 - [ ] Despliegue en MV de producción + AWS API Gateway
 - [ ] Repositorio público en GitHub (enlace aquí)

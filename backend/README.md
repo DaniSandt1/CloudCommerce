@@ -23,7 +23,7 @@ Desplegado según [DEPLOYMENT.md — Partes E y F](../DEPLOYMENT.md): **los 5 mi
 - [x] Implementar ms-pedidos, ms-checkout
 - [x] Implementar ms-analitica Fase A y Fase B — `ATHENA_MODE=real` desplegado y verificado
 - [x] `ms-pedidos` consume a `ms-productos` y `ms-usuarios` (requisito: al menos 1 microservicio con BD propia debe consumir otro)
-- [ ] Diagrama Entidad/Relación por cada BD SQL (MySQL, PostgreSQL) — en el informe, falta captura final
+- [x] Diagrama Entidad/Relación por cada BD SQL (MySQL, PostgreSQL) — [er_ecommerce.drawio](../docs/diagrama-arquitectura/er_ecommerce.drawio) e informe (sección 3.7)
 - [x] Estructura JSON de la colección MongoDB (ver [ms-pedidos/README.md](ms-pedidos/))
 - [x] `docker-compose` de despliegue en 2 MV de producción + balanceador privado
 - [x] Documentación Swagger-UI — 5/5 APIs
