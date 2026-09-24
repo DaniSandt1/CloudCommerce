@@ -14,19 +14,24 @@ Repositorio: **https://github.com/DaniSandt1/CloudCommerce**
 
 ## Arquitectura general
 
+Los 5 microservicios corren **redundados** en las 2 MV de producción (no repartidos) — cada VM tiene una copia completa de los 5, y el balanceador reparte/hace failover entre ambas. Las llamadas internas entre microservicios también pasan por el balanceador (no por IP fija), así el failover aplica de punta a punta.
+
 ```
-Usuario → AWS Amplify (Frontend React) → API Gateway (https) → Balanceador de carga (privado)
-                                                                        │
-                        ┌───────────────┬───────────────┬──────────────┼───────────────┐
-                        │               │               │              │               │
-                  ms-productos    ms-usuarios      ms-pedidos     ms-checkout     ms-analitica
-                   (Python)         (Java)          (Node.js)    (sin BD, consume  (Python, Athena)
-                        │               │               │         a los otros 3)        │
-                     MySQL         PostgreSQL        MongoDB                        Athena/Glue
-                        │               │               │
-                        └───────┬───────┴───────┬───────┘
-                                │               │
-                     (3ra MV: bases de datos, privadas)
+Usuario → AWS Amplify (Frontend React) → API Gateway (https) → VPC Link → Balanceador de carga (privado, ALB)
+                                                                                        │
+                                        ┌───────────────────────────────┬──────────────┴──────────────┬───────────────────────────────┐
+                                        │                                 │                               │
+                              MV Producción 1                                                    MV Producción 2
+                          (cloudcommerce-backend)                                            (cloudcommerce-prod2)
+                    ms-productos · ms-usuarios · ms-pedidos ·                          ms-productos · ms-usuarios · ms-pedidos ·
+                       ms-checkout · ms-analitica  (los 5)                                ms-checkout · ms-analitica  (los 5)
+                                        │                                                                 │
+                                        └──────────────────────────┬──────────────────────────────────────┘
+                                                                    │  (IP privada)
+                                                         3ra MV: bases de datos (privada)
+                                                    MySQL · PostgreSQL · MongoDB (cloudcommerce-bd)
+                                                                    │
+                                                         Athena consulta el data lake en S3
 
 Data Science: MV Ingesta (3 contenedores docker en Python, pull 100%) → Bucket S3 → AWS Glue (catálogo) → Athena
 ```
@@ -71,7 +76,7 @@ Data Science: MV Ingesta (3 contenedores docker en Python, pull 100%) → Bucket
 - ✅ `ms-analitica` (Python/FastAPI + boto3/Athena) — Fase A y Fase B completas, `ATHENA_MODE=real` desplegado en `cloudcommerce-prod2`, verificado contra los 20,000 pedidos reales
 - ✅ `frontend` (React) — pestañas Productos, Usuarios, Pedidos y Analítica, desplegado en AWS Amplify
 - ✅ `ingesta-productos`, `ingesta-usuarios` e `ingesta-pedidos` (Python → S3) — los 3 contenedores requeridos, corriendo en su propia **MV Ingesta**, bucket `cloudcommerce-datalake`
-- ✅ **Arquitectura final**: MV Producción 1 (`ms-productos`+`ms-usuarios`), MV Producción 2 (`ms-pedidos`+`ms-checkout`+`ms-analitica`), 3ra MV privada solo con las bases de datos, balanceador de carga interno (ALB + VPC Link) delante de las 2 MV de producción, API Gateway público (5 rutas) apuntando al balanceador — ver [DEPLOYMENT.md, Parte E](DEPLOYMENT.md)
+- ✅ **Arquitectura final con redundancia real**: los 5 microservicios corren completos en **ambas** MV de producción (no repartidos), apuntando a la misma 3ra MV privada de bases de datos; cada uno de los 5 Target Groups del balanceador tiene 2 targets sanos (uno por VM); las llamadas internas entre microservicios también pasan por el balanceador (no por IP fija). Failover probado en vivo: al apagar una copia de `ms-productos`, el sitio siguió funcionando desde la otra — ver [DEPLOYMENT.md, Partes E y F](DEPLOYMENT.md)
 - ✅ AWS Glue (catálogo `cloudcommerce_datalake`, 3 tablas) + mínimo 4 consultas SQL con join + 2 vistas en Athena — evidencia en el informe
 - ⏳ Diagrama de Arquitectura de Solución en draw.io (actualizar `ms-analitica` de pendiente a desplegado), informe y presentación finales — en curso
 

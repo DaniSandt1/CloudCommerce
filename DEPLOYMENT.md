@@ -738,6 +738,153 @@ Los 4 deben responder 200. Luego abre tu URL de Amplify y prueba las 3 pestañas
 
 ---
 
+# Parte F — Migración a redundancia real (ambas VM con los 5 microservicios)
+
+> ✅ **Ejecutada y verificada en producción**, incluyendo prueba real de failover.
+
+La Parte E reparte los 5 microservicios entre las 2 MV de producción (cada uno vive en una sola VM). Esta parte los **redunda**: cada una de las 2 MV de producción termina con una copia completa de los 5, y el balanceador reparte/hace failover entre ambas. Es posible sin duplicar datos porque las 3 bases de datos ya viven centralizadas en la 3ra MV (`cloudcommerce-bd`) desde la Parte E — ambas copias de cada microservicio apuntan a la misma base.
+
+```
+Balanceador (5 listeners, cada uno con 2 targets: uno por VM)
+        │
+        ├── MV Producción 1 (cloudcommerce-backend): los 5 microservicios
+        └── MV Producción 2 (cloudcommerce-prod2):   los 5 microservicios
+                    │                                        │
+                    └──────────────── IP privada ────────────┘
+                                       │
+                          3ra MV: bases de datos (cloudcommerce-bd)
+```
+
+## F.1 Desplegar los 5 microservicios en ambas VM
+
+En **cada** VM de producción (`cloudcommerce-backend` y `cloudcommerce-prod2`), reemplaza el `docker-compose.yml` por el mismo archivo completo con los 5 servicios, todos apuntando a `cloudcommerce-bd` (usa su IP privada) y comunicándose entre sí **por nombre de servicio de Docker** (se ajusta a URL del balanceador en el paso F.4):
+
+```bash
+cd ~/CloudCommerce
+git pull   # o `git checkout -- backend/docker-compose/docker-compose.yml && git pull` si se queja de cambios locales
+cd backend/docker-compose
+rm docker-compose.yml
+nano docker-compose.yml
+```
+```yaml
+services:
+  ms-productos:
+    build: ../ms-productos
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: mysql+pymysql://productos_user:productos_pass@<IP-PRIVADA-cloudcommerce-bd>:3306/productos_db
+    ports:
+      - "8001:8000"
+
+  ms-usuarios:
+    build: ../ms-usuarios
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: jdbc:postgresql://<IP-PRIVADA-cloudcommerce-bd>:5432/usuarios_db
+      DATABASE_USER: usuarios_user
+      DATABASE_PASSWORD: usuarios_pass
+    ports:
+      - "8002:8000"
+
+  ms-pedidos:
+    build: ../ms-pedidos
+    restart: unless-stopped
+    environment:
+      MONGODB_URL: mongodb://<IP-PRIVADA-cloudcommerce-bd>:27017/pedidos_db
+      PRODUCTOS_URL: http://ms-productos:8000
+      USUARIOS_URL: http://ms-usuarios:8000
+    ports:
+      - "8003:8000"
+
+  ms-checkout:
+    build: ../ms-checkout
+    restart: unless-stopped
+    environment:
+      PRODUCTOS_URL: http://ms-productos:8000
+      USUARIOS_URL: http://ms-usuarios:8000
+      PEDIDOS_URL: http://ms-pedidos:8000
+    ports:
+      - "8004:8000"
+
+  ms-analitica:
+    build: ../ms-analitica
+    restart: unless-stopped
+    environment:
+      ATHENA_MODE: real
+      ATHENA_DATABASE: cloudcommerce_datalake
+      ATHENA_OUTPUT_S3: s3://cloudcommerce-datalake/athena-results/
+      AWS_DEFAULT_REGION: us-east-1
+    ports:
+      - "8005:8000"
+```
+```bash
+docker compose up -d --build
+```
+
+⚠️ Si la VM no tiene el rol IAM `LabInstanceProfile` (necesario para `ms-analitica`), asígnalo: **EC2 → Instances → (la instancia) → Actions → Security → Modify IAM role**.
+
+Verifica los 5 en cada VM (`curl localhost:8001/health` ... `:8005/analitica/ventas-por-categoria`).
+
+## F.2 Security Groups — permitir la "otra mitad"
+
+Cada VM ahora corre servicios que antes no tenía, así que necesita permisos que antes no necesitaba:
+
+- **`cloudcommerce-bd`**: agrega reglas para que **ambas** VM de producción lleguen a los 3 puertos de BD (3306, 5432, 27017) — antes cada puerto solo lo tenía habilitado una de las 2 VM.
+- **Security Group de `cloudcommerce-backend`**: agrega 8003, 8004, 8005 con *source* = `sg-balanceador` (antes solo tenía 8001/8002).
+- **Security Group de `cloudcommerce-prod2`**: agrega 8001, 8002 con *source* = `sg-balanceador` (antes solo tenía 8003/8004/8005).
+
+Verifica con una llamada real (no solo `/health`, que en algunos servicios no prueba la BD) — por ejemplo `curl localhost:8003/usuarios/1/pedidos` en la VM que antes no tenía Mongo.
+
+## F.3 Registrar el 2do target en cada Target Group
+
+**EC2 → Target Groups** → cada uno de los 5 (`tg-productos`, `tg-usuarios`, `tg-pedidos`, `tg-checkout`, `tg-analitica`) → **Register targets** → agrega la instancia que le faltaba, mismo puerto. Cada grupo debe quedar con **2 de 2 `Healthy`**.
+
+## F.4 Apuntar las llamadas internas al balanceador, no a la copia local
+
+Con el paso F.1, `ms-pedidos`/`ms-checkout` le hablan a la copia **local** de `ms-productos`/`ms-usuarios` (incluso port 8000, dentro de la misma red de docker compose) — si esa copia local se cae, no aprovechan la otra VM. Cambia eso al DNS interno del balanceador (**EC2 → Load Balancers → `cloudcommerce-lb`** → copia el "Nombre de DNS"):
+
+En **ambas** VM, edita `docker-compose.yml`:
+```yaml
+  ms-pedidos:
+    environment:
+      MONGODB_URL: mongodb://<IP-PRIVADA-cloudcommerce-bd>:27017/pedidos_db
+      PRODUCTOS_URL: http://<DNS-DEL-BALANCEADOR>:8001
+      USUARIOS_URL: http://<DNS-DEL-BALANCEADOR>:8002
+
+  ms-checkout:
+    environment:
+      PRODUCTOS_URL: http://<DNS-DEL-BALANCEADOR>:8001
+      USUARIOS_URL: http://<DNS-DEL-BALANCEADOR>:8002
+      PEDIDOS_URL: http://<DNS-DEL-BALANCEADOR>:8003
+```
+```bash
+docker compose up -d --build ms-pedidos ms-checkout
+```
+
+Verifica que una llamada que dispara comunicación interna real siga funcionando, por ejemplo:
+```bash
+curl -X POST localhost:8004/checkout/resumen \
+  -H "Content-Type: application/json" \
+  -d '{"id_usuario":1,"items":[{"id_producto":3914,"cantidad":1}]}'
+```
+
+## F.5 Probar el failover de verdad
+
+En una de las 2 VM:
+```bash
+docker compose stop ms-productos
+```
+Desde tu laptop, contra la URL pública de API Gateway (no la EC2):
+```bash
+curl https://<api-id>.execute-api.us-east-1.amazonaws.com/productos-api/health
+```
+Debe seguir respondiendo `200 OK` — el balanceador enruta a la copia sana de la otra VM. Repite un par de veces para confirmar, y vuelve a levantar el contenedor:
+```bash
+docker compose start ms-productos
+```
+
+---
+
 ## Reinicio rápido (ya con todo instalado)
 
 Si ya hiciste los pasos de las Partes A y B una vez, retomar el trabajo en una sesión nueva es corto. **Prende primero la MV Backend**, luego la MV Ingesta (necesitas su IP para el frontend y, si cambió, para reconfigurar `.env` de la ingesta).
@@ -857,13 +1004,13 @@ Pasa cuando `AMPLIFY_MONOREPO_APP_ROOT` está seteado (modo Monorepo activado) p
 - [x] Implementar `ms-analitica` Fase A (mock) y Fase B (`ATHENA_MODE=real`, desplegado en `cloudcommerce-prod2` y verificado contra los 20,000 pedidos reales) — issue [#4](https://github.com/DaniSandt1/CloudCommerce/issues/4)
 - [x] AWS API Gateway (https) público delante del backend — las 5 rutas (productos/usuarios/pedidos/checkout/analitica)
 - [x] Desplegar el frontend en AWS Amplify — con las pestañas Productos, Usuarios, Pedidos y Analítica
-- [x] Repartir los 5 microservicios en 2 MV de producción + balanceador de carga privado — **Parte E ejecutada**: `cloudcommerce-backend` (productos+usuarios) / `cloudcommerce-prod2` (pedidos+checkout+analitica) detrás de `cloudcommerce-lb` (ALB interno)
-- [x] Mover las bases de datos a una 3ra MV privada (no pública) — `cloudcommerce-bd`, sin IP pública en uso, solo accesible por IP privada desde las MV de producción/ingesta
+- [x] Desplegar los 5 microservicios en 2 MV de producción + balanceador de carga privado — **Parte E ejecutada**, luego **migrado a redundancia real en la Parte F**: los 5 microservicios corren completos en `cloudcommerce-backend` **y** `cloudcommerce-prod2`, cada Target Group con 2 targets sanos, failover probado en vivo
+- [x] Mover las bases de datos a una 3ra MV privada (no pública) — `cloudcommerce-bd`, sin IP pública en uso, solo accesible por IP privada desde ambas MV de producción y la de ingesta
 - [x] Apuntar el API Gateway al balanceador de carga vía VPC Link — las 5 rutas usan integración `Private` a través de `cloudcommerce-vpclink`
 - [x] Rutas de API Gateway + variables de Amplify para `ms-pedidos`/`ms-checkout`/`ms-analitica`
 - [x] MV "ingesta" dedicada para los contenedores de ingesta — los 3 (`ingesta-productos`, `ingesta-usuarios`, `ingesta-pedidos`)
 - [x] AWS Glue (catálogo de datos, base `cloudcommerce_datalake`) + diagrama E/R del catálogo — evidencia en el informe
 - [x] Mínimo 4 consultas SQL + 2 vistas en Athena — evidencia en el informe
-- [ ] Diagrama de Arquitectura de Solución en draw.io — actualizar `ms-analitica` de "pendiente" a desplegado
+- [ ] Diagrama de Arquitectura de Solución en draw.io — actualizar `ms-analitica` de "pendiente" a desplegado, y reflejar que ambas MV corren los 5 microservicios (redundancia, no reparto)
 - [x] Documentación Swagger-UI — 5/5 APIs (`ms-productos` `/docs`, `ms-usuarios` `/swagger-ui.html`, `ms-pedidos` `/docs`, `ms-checkout` `/docs`, `ms-analitica` `/docs`)
 - [ ] Informe y presentación finales — informe en redacción, capturas de AWS en curso

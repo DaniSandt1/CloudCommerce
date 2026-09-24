@@ -16,7 +16,7 @@ Ver [docker-compose/README.md](docker-compose/) — levanta los 5 microservicios
 
 ## Arquitectura de producción (AWS)
 
-Desplegado según [DEPLOYMENT.md — Parte E](../DEPLOYMENT.md): 2 MV de producción (`ms-productos`+`ms-usuarios` en una, `ms-pedidos`+`ms-checkout`+`ms-analitica` en la otra) detrás de un balanceador de carga privado (ALB interno + VPC Link), con las 3 bases de datos en una 3ra MV privada (no pública), y todo expuesto públicamente vía AWS API Gateway (https, 5 rutas).
+Desplegado según [DEPLOYMENT.md — Partes E y F](../DEPLOYMENT.md): **los 5 microservicios corren completos en las 2 MV de producción** (redundancia real, no repartidos), detrás de un balanceador de carga privado (ALB interno + VPC Link) que reparte tráfico entre ambas copias y hace failover automático si una falla. Las 3 bases de datos viven en una 3ra MV privada (no pública), compartida por las 2 copias de cada microservicio. Las llamadas internas entre microservicios (`ms-pedidos`/`ms-checkout` → `ms-productos`/`ms-usuarios`/`ms-pedidos`) pasan por el DNS del balanceador, no por una IP fija, para que el failover también aplique al tráfico interno. Todo expuesto públicamente vía AWS API Gateway (https, 5 rutas). Failover verificado en vivo: apagando una copia de `ms-productos`, el sitio sigue funcionando desde la otra.
 
 ## Pendiente (para la entrega final)
 
